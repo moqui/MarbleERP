@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<entity-facade-xml type="seed-initial">
+    <moqui.basic.Enumeration description="Marble ERP App" enumId="UgtMarbleErp" enumTypeId="UserGroupType"/>
+
+    <!-- Administrators User Group -->
+    <userGroups userGroupId="MarbleErpAdmin" description="Marble ERP Administrators" groupTypeEnumId="UgtMarbleErp">
+        <permissions userPermissionId="INVOICE_APPROVE" fromDate="0"/>
+        <permissions userPermissionId="ORDER_APPROVE" fromDate="0"/>
+        <permissions userPermissionId="CARD_NUMBER_EDIT" fromDate="0"/>
+        <permissions userPermissionId="FISCAL_REOPEN" fromDate="0"/>
+        <authz artifactAuthzId="MarbleAdminMyAccount" artifactGroupId="MY_ACCOUNT" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL"/>
+    </userGroups>
+    <artifactGroups artifactGroupId="MarbleErpAll" description="Marble ERP (via root screen)">
+        <artifacts artifactName="component://MarbleERP/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <authz artifactAuthzId="MARBLE_ERP_ADMIN" userGroupId="ADMIN"  authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
+            <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
+        <authz artifactAuthzId="MARBLE_ERP_MERP_ADMIN" userGroupId="MarbleErpAdmin" authzTypeEnumId="AUTHZT_ALWAYS" authzActionEnumId="AUTHZA_ALL">
+            <filters entityFilterSetId="MANTLE_ACTIVE_ORG"/></authz>
+    </artifactGroups>
+
+    <!-- Root screen (no inherit) and general screens group, for all non-admin user groups -->
+    <artifactGroups artifactGroupId="MarbleErpApp" description="Marble ERP App Access">
+        <artifacts artifactName="component://MarbleERP/screen/marble.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="N"/>
+        <artifacts artifactName="component://MarbleERP/screen/marble/dashboard.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/Search.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+        <artifacts artifactName="component://SimpleScreens/screen/SimpleScreens/SimpleReport/QuickViewReport.xml" artifactTypeEnumId="AT_XML_SCREEN" inheritAuthz="Y"/>
+    </artifactGroups>
+
+    <!-- ========== User Groups ========== -->
+    <!-- NOTE: see SimpleScreensSetupData.xml for Artifact Groups for parts of SimpleScreens -->
+    <!-- TODO: revisit and redesign role specific groups, variation on those in PopCommerceAaaSetupData.xml -->
+
+    <!-- ========== DataDocument Links ========== -->
+
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleWikiPage" linkSeqId="41" linkSet="marble" label="Wiki Page" urlType="screen"
+            linkUrl="/apps/marble/Wiki/wiki/${wikiSpaceId}/${pagePath?:''}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleProduct" linkSeqId="41" linkSet="marble" label="Edit Product" urlType="screen"
+            linkUrl="/apps/marble/Catalog/Product/EditProduct?productId=${productId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleFacility" linkSeqId="41" linkSet="marble" label="Edit Facility" urlType="screen"
+            linkUrl="/apps/marble/Facility/EditFacility?facilityId=${facilityId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleRequest" linkSeqId="41" linkSet="marble" label="Edit Request" urlType="screen"
+            linkUrl="/apps/marble/Request/EditRequest?requestId=${requestId}"/>
+
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="41" linkSet="marble" label="Edit Party" urlType="screen"
+            linkUrl="/apps/marble/Party/EditParty?partyId=${partyId}"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="42" linkSet="marble" label="Edit Customer" urlType="screen"
+            linkUrl="/apps/marble/Customer/EditCustomer?partyId=${partyId}" linkCondition="'Customer' in roles*.roleTypeId"/>
+    <moqui.entity.document.DataDocumentLink dataDocumentId="MantleParty" linkSeqId="43" linkSet="marble" label="Edit Supplier" urlType="screen"
+            linkUrl="/apps/marble/Supplier/EditSupplier?partyId=${partyId}" linkCondition="'Supplier' in roles*.roleTypeId"/>
+</entity-facade-xml>

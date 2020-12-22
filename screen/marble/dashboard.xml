@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        default-menu-title="Dashboard" default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon">
+
+    <transition name="search"><default-response url="../Search"/></transition>
+    <transition name="quickLookup"><default-response url="../QuickLookup"/></transition>
+
+    <widgets>
+        <container-row><row-col md="6" style="text-center">
+            <form-single name="SearchOptions" transition="search" extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchOptions">
+                <field name="queryString"><default-field tooltip=""><text-line size="25"/></default-field></field>
+                <field-layout><field-row-big justify="center"><field-ref name="documentType"/><field-ref name="queryString"/>
+                    <field-ref name="submitButton"/></field-row-big></field-layout>
+            </form-single>
+        </row-col><row-col md="6" style="text-center">
+            <form-single name="QuickLookupForm" transition="quickLookup" focus-field=""
+                    extends="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml#QuickLookupForm">
+                <field-layout><field-row-big justify="center"><field-ref name="lookupId"/><field-ref name="submitButton"/></field-row-big></field-layout>
+            </form-single>
+        </row-col></container-row>
+
+        <section name="QuickInfoSection"><actions>
+            <entity-find entity-name="mantle.party.PartyRole" list="orgPartyRoles">
+                <econdition field-name="roleTypeId" value="OrgInternal"/></entity-find>
+            <set field="orgIntPartyIds" from="orgPartyRoles*.partyId"/>
+
+            <entity-find-count entity-name="mantle.order.OrderPart" count-field="orderPlacedCount">
+                <econdition field-name="statusId" operator="in" from="['OrderPlaced', 'OrderProcessing']"/>
+                <econdition field-name="vendorPartyId" operator="in" from="orgIntPartyIds"/>
+            </entity-find-count>
+            <entity-find-count entity-name="mantle.order.OrderPart" count-field="orderApprovedCount">
+                <econdition field-name="statusId" operator="in" from="['OrderApproved', 'OrderSent']"/>
+                <econdition field-name="vendorPartyId" operator="in" from="orgIntPartyIds"/>
+            </entity-find-count>
+            <entity-find-count entity-name="mantle.order.OrderPart" count-field="orderHeldCount">
+                <econdition field-name="statusId" value="OrderHold"/>
+                <econdition field-name="vendorPartyId" operator="in" from="orgIntPartyIds"/>
+            </entity-find-count>
+
+            <entity-find-count entity-name="mantle.request.RequestAndParty" count-field="requestSubmittedCount">
+                <econdition field-name="statusId" value="ReqSubmitted"/>
+                <econdition field-name="roleTypeId" value="Customer"/>
+            </entity-find-count>
+            <entity-find-count entity-name="mantle.request.RequestAndParty" count-field="requestInProgressCount">
+                <econdition field-name="statusId" operator="in" from="['ReqReviewed', 'ReqInProgress']"/>
+                <econdition field-name="roleTypeId" value="Customer"/>
+            </entity-find-count>
+        </actions><widgets>
+            <container-row><row-col sm="0" md="1"><label text="&amp;nbsp;" encode="false"/></row-col><row-col sm="5" md="4" style="text-center">
+                <container style="row">
+                    <container style="col"><label text="Sales Orders" type="h4"/></container>
+                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderPlaced,OrderProcessing', statusId_op:'in']"
+                            text="Placed" badge="${orderPlacedCount}" btn-type="default"/></container>
+                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderApproved,OrderSent', statusId_op:'in']"
+                            text="Approved" badge="${orderApprovedCount}" btn-type="default"/></container>
+                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderHold']"
+                            text="Held" badge="${orderHeldCount}" btn-type="default"/></container>
+                </container>
+            </row-col><row-col sm="2"><label text="&amp;nbsp;" encode="false"/></row-col><row-col sm="5" md="4" style="text-center">
+                <container style="row">
+                    <container style="col"><label text="Requests" type="h4"/></container>
+                    <container style="col q-my-auto"><link url="../Request" parameter-map="[statusId:'ReqSubmitted']"
+                            text="Submitted" badge="${requestSubmittedCount}" btn-type="default"/></container>
+                    <container style="col q-my-auto"><link url="../Request" parameter-map="[statusId:'ReqReviewed,ReqInProgress', statusId_op:'in']"
+                            text="In Progress" badge="${requestInProgressCount}" btn-type="default"/></container>
+                </container>
+            </row-col><row-col sm="0" md="1"><label text="&amp;nbsp;" encode="false"/></row-col></container-row>
+        </widgets></section>
+
+        <label text="&amp;nbsp;" type="p" encode="false"/>
+
+        <container-row style="text-center"><row-col sm="4">
+            <container><link text="Customers" url="../Customer" link-type="anchor" style="h3"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Sales Orders" url="../Order" link-type="anchor" parameter-map="[orderType:'Sales']"/></container>
+
+            <container><link text="Shipping" url="../Shipping" link-type="anchor"/></container>
+            <container><link text="Outgoing Shipments" url="../Shipment" link-type="anchor" parameter-map="[parentShipmentType:'ShpTpOutgoing']"/></container>
+            <container><link text="Returns" url="../Return" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+        </row-col><row-col sm="4">
+            <container><link text="Internal" url="../Accounting" link-type="anchor" style="h3"/></container>
+
+            <container><link text="All Parties" url="../Party" link-type="anchor"/></container>
+
+            <container><link text="Requests" url="../Request" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Catalog" url="../Catalog" link-type="anchor"/></container>
+            <container><link text="Products" url="../Catalog/Product" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container>
+                <link text="Assets" url="../Asset" link-type="anchor" style="text-strong"/>
+                <label text=" &amp; "/>
+                <link text="Inventory" url="../Asset/Asset/FindSummary" link-type="anchor" parameter-map="[assetTypeEnumId:'AstTpInventory']"/>
+            </container>
+            <container><link text="Manufacturing" url="../Manufacturing" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Facilities" url="../Facility" link-type="anchor"/></container>
+            <container><link text="Stores" url="../ProductStore" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Wiki/Content" url="../Wiki/WikiSpaces" link-type="anchor"/></container>
+            <container><link text="Wiki Blogs" url="../Wiki/WikiBlogs" link-type="anchor"/></container>
+            <container><link text="Survey" url="../Survey" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Accounting" url="../Accounting" link-type="anchor" style="text-strong"/></container>
+            <container><link text="Reports" url="../Accounting/Reports" link-type="anchor"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+            <container style="text-center">
+                <link url="../QuickViewReport" text="Custom Reports" link-type="anchor"/>
+                <label text=" - "/>
+                <link url="../SimpleReport" text="Report Builder" link-type="anchor"/>
+            </container>
+        </row-col><row-col sm="4">
+            <container><link text="Suppliers" url="../Supplier" link-type="anchor" style="h3"/></container>
+
+            <label text="&amp;nbsp;" type="p" encode="false"/>
+
+            <container><link text="Purchase Orders" url="../Order" link-type="anchor" parameter-map="[orderType:'Purchase']"/></container>
+            <container><link text="Incoming Shipments" url="../Shipment" link-type="anchor" parameter-map="[parentShipmentType:'ShpTpIncoming']"/></container>
+
+
+        </row-col></container-row>
+    </widgets>
+</screen>

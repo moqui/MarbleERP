@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a 
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
+        default-menu-title="Marble ERP" menu-image="fa fa-thumbs-up" menu-image-type="icon" server-static="vuet,qvt">
+
+    <always-actions>
+        <set field="appRoot" value="marble"/>
+
+        <set field="searchIndexName" value="mantle"/>
+        <set field="searchLinkSets" value="marble"/>
+        <set field="searchProductDocType" value="MantleProduct"/>
+        <set field="searchPartyDocType" value="MantleParty"/>
+
+        <set field="appUserGroupTypeEnumId" value="UgtMarbleErp"/>
+
+        <service-call name="mantle.party.PartyServices.setup#UserOrganizationInfo" out-map="context"/>
+    </always-actions>
+
+    <subscreens default-item="dashboard" always-use-full-path="true">
+        <subscreens-item name="Search" location="component://SimpleScreens/screen/SimpleScreens/Search.xml" menu-index="2"/>
+        <subscreens-item name="QuickLookup" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml" menu-index="3"/>
+
+        <!-- NOTE: here down is in alpha order -->
+
+        <subscreens-item name="Accounting" location="component://SimpleScreens/screen/SimpleScreens/Accounting.xml" menu-index="10"/>
+        <subscreens-item name="Asset" location="component://SimpleScreens/screen/SimpleScreens/Asset.xml" menu-index="10"/>
+        <subscreens-item name="Catalog" location="component://SimpleScreens/screen/SimpleScreens/Catalog.xml" menu-index="10"/>
+        <subscreens-item name="Customer" location="component://SimpleScreens/screen/SimpleScreens/Customer.xml" menu-index="10"/>
+        <subscreens-item name="Facility" location="component://SimpleScreens/screen/SimpleScreens/Facility.xml" menu-index="10"/>
+        <subscreens-item name="Manufacturing" location="component://SimpleScreens/screen/SimpleScreens/Manufacturing.xml" menu-index="10"/>
+
+        <subscreens-item name="Order" location="component://SimpleScreens/screen/SimpleScreens/Order.xml" menu-index="10"/>
+        <subscreens-item name="Party" location="component://SimpleScreens/screen/SimpleScreens/Party.xml" menu-index="10"/>
+        <subscreens-item name="Request" location="component://SimpleScreens/screen/SimpleScreens/Request.xml" menu-index="10"/>
+        <subscreens-item name="Return" location="component://SimpleScreens/screen/SimpleScreens/Return.xml" menu-index="10"/>
+        <subscreens-item name="Shipment" location="component://SimpleScreens/screen/SimpleScreens/Shipment.xml" menu-index="10"/>
+        <subscreens-item name="Shipping" location="component://SimpleScreens/screen/SimpleScreens/Shipping.xml" menu-index="10"/>
+
+        <subscreens-item name="ProductStore" location="component://SimpleScreens/screen/SimpleScreens/ProductStore.xml" menu-index="10"/>
+        <subscreens-item name="Gateway" location="component://SimpleScreens/screen/SimpleScreens/Gateway.xml" menu-include="false"/>
+        <subscreens-item name="Supplier" location="component://SimpleScreens/screen/SimpleScreens/Supplier.xml" menu-index="10"/>
+        <subscreens-item name="Survey" location="component://SimpleScreens/screen/SimpleScreens/Survey.xml" menu-index="10"/>
+        <subscreens-item name="Wiki" location="component://SimpleScreens/screen/SimpleScreens/Wiki.xml" menu-index="10"/>
+
+        <subscreens-item name="QuickViewReport" menu-title="Custom Reports" menu-index="30"
+                location="component://SimpleScreens/screen/SimpleScreens/SimpleReport/QuickViewReport.xml"/>
+        <subscreens-item name="SimpleReport" menu-title="Report Builder" menu-index="31"
+                location="component://SimpleScreens/screen/SimpleScreens/SimpleReport.xml"/>
+    </subscreens>
+
+    <widgets>
+        <section name="OrgChooserSection" condition="hideNav != 'true'"><widgets>
+            <render-mode><text type="html"><![CDATA[
+            <div id="active-org-menu" class="nav navbar-right dropdown">
+                <a id="active-org-menu-link" href="#" class="dropdown-toggle btn btn-default btn-sm navbar-btn" data-toggle="dropdown" title="Organization">
+                    <i class="fa fa-globe"></i> ${(activeOrg.pseudoId)!}</a>
+                <ul class="dropdown-menu">
+                    <#if activeOrg?has_content>
+                        <li><a href="${sri.buildUrl('/apps/setPrefGoLast').url}?preferenceKey=ACTIVE_ORGANIZATION&preferenceValue=">Clear Active Organization</a></li>
+                    </#if>
+                    <#if userOrgList?has_content><#list userOrgList as userOrg>
+                        <li><a href="${sri.buildUrl('/apps/setPrefGoLast').url}?preferenceKey=ACTIVE_ORGANIZATION&preferenceValue=${userOrg.partyId}">${userOrg.pseudoId}: ${userOrg.organizationName}</a></li>
+                    </#list></#if>
+                </ul>
+            </div>
+            <script>$("#navbar-buttons").append($("#active-org-menu")); $('#active-org-menu-link').tooltip({ placement:'bottom', trigger:'hover' });</script>
+            ]]></text></render-mode>
+        </widgets></section>
+        <subscreens-panel id="MarbleErpPanel" type="popup" title="Marble ERP"/>
+    </widgets>
+</screen>
