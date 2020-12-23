@@ -62,11 +62,11 @@ along with this software (see the LICENSE.md file). If not, see
             <container-row><row-col sm="0" md="1"><label text="&amp;nbsp;" encode="false"/></row-col><row-col sm="5" md="4" style="text-center">
                 <container style="row">
                     <container style="col"><label text="Sales Orders" type="h4"/></container>
-                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderPlaced,OrderProcessing', statusId_op:'in']"
+                    <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderPlaced,OrderProcessing', statusId_op:'in']"
                             text="Placed" badge="${orderPlacedCount}" btn-type="default"/></container>
-                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderApproved,OrderSent', statusId_op:'in']"
+                    <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderApproved,OrderSent', statusId_op:'in']"
                             text="Approved" badge="${orderApprovedCount}" btn-type="default"/></container>
-                    <container style="col q-my-auto"><link url="../Order" parameter-map="[orderType:'Sales', statusId:'OrderHold']"
+                    <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderHold']"
                             text="Held" badge="${orderHeldCount}" btn-type="default"/></container>
                 </container>
             </row-col><row-col sm="2"><label text="&amp;nbsp;" encode="false"/></row-col><row-col sm="5" md="4" style="text-center">
@@ -83,6 +83,7 @@ along with this software (see the LICENSE.md file). If not, see
         <label text="&amp;nbsp;" type="p" encode="false"/>
 
         <container-row style="diagram-sequence"><row-col sm="4">
+
             <container style="diagram-sequence-actor"><link text="Customers" url="../Customer" link-type="anchor"/></container>
 
             <container style="diagram-sequence-item">
@@ -171,21 +172,23 @@ along with this software (see the LICENSE.md file). If not, see
 
         </row-col><row-col sm="4">
 
-            <container style="diagram-sequence-actor"><link text="Internal" url="../Accounting" link-type="anchor"/></container>
+            <container style="diagram-sequence-actor"><link text="Internal" url="../Party/FindParty" link-type="anchor" parameter-map="[roleTypeId:'OrgInternal']"/></container>
 
             <container style="diagram-sequence-item">
-                <container><link text="All Parties" url="../Party" link-type="anchor"/></container>
-                <container><link text="Employees &amp; Contractors" url="../Party/" link-type="anchor"/></container>
-                <!-- TODO: "Employees & Contractors" or maybe "Human Resources" (look up by Employee role on FindParty for now) -->
+                <container>
+                    <link text="Employees" url="../Party/FindParty" link-type="anchor" parameter-map="[roleTypeId:'Employee']"/>
+                    <label text=" - "/>
+                    <link text="All Parties" url="../Party" link-type="anchor"/>
+                </container>
             </container>
 
+            <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
                 <container><link text="Requests" url="../Request" link-type="anchor"/></container>
                 <!-- maybe not, are mostly internal: <container style="fa left" type="i"/><container style="fa right" type="i"/> -->
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <link text="Products" url="../Catalog/Product" link-type="anchor"/>
                 <label text=" - "/>
@@ -193,7 +196,6 @@ along with this software (see the LICENSE.md file). If not, see
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container>
                     <link text="Assets" url="../Asset" link-type="anchor" style="text-strong"/>
@@ -204,19 +206,13 @@ along with this software (see the LICENSE.md file). If not, see
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container><link text="Projects" url="../Project" link-type="anchor"/></container>
-                <container style="fa left" type="i"/><container style="fa right" type="i"/>
-            </container>
-            <container style="diagram-sequence-item">
                 <container><link text="Tasks" url="../Task" link-type="anchor"/></container>
-                <container style="fa left" type="i"/><container style="fa right" type="i"/>
             </container>
             <!-- TODO: Events? what would it go to? most events are context specific, ie for a Party, Facility, Asset, etc -->
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container><link text="Facilities" url="../Facility" link-type="anchor"/></container>
                 <container><link text="Stores" url="../ProductStore" link-type="anchor"/></container>
@@ -232,7 +228,6 @@ along with this software (see the LICENSE.md file). If not, see
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <link text="Accounting" url="../Accounting" link-type="anchor" style="text-strong"/>
                 <label text=" - "/>
@@ -243,7 +238,9 @@ along with this software (see the LICENSE.md file). If not, see
                 <label text=" - "/>
                 <link url="../SimpleReport" text="Report Builder" link-type="anchor"/>
             </container>
+
         </row-col><row-col sm="4">
+
             <container style="diagram-sequence-actor"><link text="Suppliers" url="../Supplier" link-type="anchor"/></container>
 
             <label text="&amp;nbsp;" encode="false" type="p"/>
@@ -256,7 +253,6 @@ along with this software (see the LICENSE.md file). If not, see
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container><link text="Purchase Orders &amp; Quotes" url="../Order/FindOrder" link-type="anchor" parameter-map="[orderType:'Purchase']"/></container>
                 <container style="fa right" type="i"/>
@@ -264,14 +260,12 @@ along with this software (see the LICENSE.md file). If not, see
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container><link text="Purchase Shipments" url="../Shipment/FindShipment" link-type="anchor" parameter-map="[parentShipmentType:'ShpTpIncoming']"/></container>
                 <container style="fa left" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <link text="Payable Invoices" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Payable']"/>
                 <container style="fa left" type="i"/>
@@ -286,7 +280,6 @@ along with this software (see the LICENSE.md file). If not, see
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-
             <container style="diagram-sequence-item">
                 <container><link text="Purchase Returns" url="../Return" link-type="anchor" parameter-map="[returnType:'Supplier']"/></container>
                 <container style="fa right" type="i"/>

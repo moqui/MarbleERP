@@ -32,26 +32,31 @@ along with this software (see the LICENSE.md file). If not, see
         <subscreens-item name="Search" location="component://SimpleScreens/screen/SimpleScreens/Search.xml" menu-index="2"/>
         <subscreens-item name="QuickLookup" location="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml" menu-index="3"/>
 
-        <!-- NOTE: here down is in alpha order -->
-
+        <!-- NOTE: use the same menu-index to put menu items in alpha order -->
         <subscreens-item name="Accounting" location="component://SimpleScreens/screen/SimpleScreens/Accounting.xml" menu-index="10"/>
         <subscreens-item name="Asset" location="component://SimpleScreens/screen/SimpleScreens/Asset.xml" menu-index="10"/>
         <subscreens-item name="Catalog" location="component://SimpleScreens/screen/SimpleScreens/Catalog.xml" menu-index="10"/>
+
         <subscreens-item name="Customer" location="component://SimpleScreens/screen/SimpleScreens/Customer.xml" menu-index="10"/>
         <subscreens-item name="Facility" location="component://SimpleScreens/screen/SimpleScreens/Facility.xml" menu-index="10"/>
         <subscreens-item name="Manufacturing" location="component://SimpleScreens/screen/SimpleScreens/Manufacturing.xml" menu-index="10"/>
 
         <subscreens-item name="Order" location="component://SimpleScreens/screen/SimpleScreens/Order.xml" menu-index="10"/>
         <subscreens-item name="Party" location="component://SimpleScreens/screen/SimpleScreens/Party.xml" menu-index="10"/>
-        <subscreens-item name="Request" location="component://SimpleScreens/screen/SimpleScreens/Request.xml" menu-index="10"/>
-        <subscreens-item name="Return" location="component://SimpleScreens/screen/SimpleScreens/Return.xml" menu-index="10"/>
-        <subscreens-item name="Shipment" location="component://SimpleScreens/screen/SimpleScreens/Shipment.xml" menu-index="10"/>
-        <subscreens-item name="Shipping" location="component://SimpleScreens/screen/SimpleScreens/Shipping.xml" menu-index="10"/>
+        <subscreens-item name="Project" location="component://SimpleScreens/screen/SimpleScreens/Project.xml" menu-index="10"/>
 
         <subscreens-item name="ProductStore" location="component://SimpleScreens/screen/SimpleScreens/ProductStore.xml" menu-index="10"/>
         <subscreens-item name="Gateway" location="component://SimpleScreens/screen/SimpleScreens/Gateway.xml" menu-include="false"/>
+
+        <subscreens-item name="Request" location="component://SimpleScreens/screen/SimpleScreens/Request.xml" menu-index="10"/>
+        <subscreens-item name="Return" location="component://SimpleScreens/screen/SimpleScreens/Return.xml" menu-index="10"/>
+        <subscreens-item name="Shipment" location="component://SimpleScreens/screen/SimpleScreens/Shipment.xml" menu-index="10"/>
+
+        <subscreens-item name="Shipping" location="component://SimpleScreens/screen/SimpleScreens/Shipping.xml" menu-index="10"/>
         <subscreens-item name="Supplier" location="component://SimpleScreens/screen/SimpleScreens/Supplier.xml" menu-index="10"/>
         <subscreens-item name="Survey" location="component://SimpleScreens/screen/SimpleScreens/Survey.xml" menu-index="10"/>
+
+        <subscreens-item name="Task" location="component://SimpleScreens/screen/SimpleScreens/Task.xml" menu-index="10"/>
         <subscreens-item name="Wiki" location="component://SimpleScreens/screen/SimpleScreens/Wiki.xml" menu-index="10"/>
 
         <subscreens-item name="QuickViewReport" menu-title="Custom Reports" menu-index="30"
