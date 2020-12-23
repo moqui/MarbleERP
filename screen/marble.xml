@@ -39,6 +39,7 @@ along with this software (see the LICENSE.md file). If not, see
 
         <subscreens-item name="Customer" location="component://SimpleScreens/screen/SimpleScreens/Customer.xml" menu-index="10"/>
         <subscreens-item name="Facility" location="component://SimpleScreens/screen/SimpleScreens/Facility.xml" menu-index="10"/>
+        <subscreens-item name="HumanRes" location="component://SimpleScreens/screen/SimpleScreens/HumanRes.xml" menu-index="10"/>
         <subscreens-item name="Manufacturing" location="component://SimpleScreens/screen/SimpleScreens/Manufacturing.xml" menu-index="10"/>
 
         <subscreens-item name="Order" location="component://SimpleScreens/screen/SimpleScreens/Order.xml" menu-index="10"/>

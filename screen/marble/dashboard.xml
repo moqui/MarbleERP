@@ -94,19 +94,21 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
                 <!-- TODO: constrain better -->
-                <container><link text="Customer Requests" url="../Request" link-type="anchor"/></container>
+                <link text="Customer &lt;strong&gt;Requests&lt;/strong&gt;" encode="false" url="../Request" link-type="anchor"/>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <link text="Sales Orders &amp; Quotes" url="../Order/FindOrder" link-type="anchor" parameter-map="[orderType:'Sales']"/>
+                <link text="Sales &lt;strong&gt;Orders&lt;/strong&gt; &amp;amp; Quotes" encode="false" url="../Order/FindOrder"
+                        link-type="anchor" parameter-map="[orderType:'Sales']"/>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <container><link text="Sales Shipments" url="../Shipment/FindShipment" link-type="anchor" parameter-map="[parentShipmentType:'ShpTpOutgoing']"/></container>
+                <container><link text="Sales &lt;strong&gt;Shipments&lt;/strong&gt;" encode="false" url="../Shipment/FindShipment"
+                        link-type="anchor" parameter-map="[parentShipmentType:'ShpTpOutgoing']"/></container>
                 <container><link text="Shipping - Pick &amp; Pack" url="../Shipping" link-type="anchor"/></container>
                 <container style="fa left" type="i"/>
             </container>
@@ -125,7 +127,8 @@ along with this software (see the LICENSE.md file). If not, see
             <moqui.basic.Enumeration description="Template" enumId="InvoiceTemplate" enumTypeId="InvoiceType"/>
             -->
             <container style="diagram-sequence-item">
-                <link text="Receivable Invoices" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Receivable']"/>
+                <link text="Receivable &lt;strong&gt;Invoices&lt;/strong&gt;" encode="false" url="../Accounting/Invoice/FindInvoice"
+                        link-type="anchor" parameter-map="[invoiceType:'Receivable']"/>
                 <container style="fa left" type="i"/>
             </container>
             <container style="diagram-sequence-item">
@@ -147,25 +150,26 @@ along with this software (see the LICENSE.md file). If not, see
             <moqui.basic.Enumeration description="Payroll Other Payment" enumId="PtPayrollOtherPayment" enumTypeId="PaymentType" parentEnumId="PtInvoicePayment"/>
             -->
             <container style="diagram-sequence-item">
-                <link text="Customer Payments" url="../Accounting/Payment/FindPayment" link-type="anchor" parameter-map="[paymentType:'Incoming',paymentTypeEnumId:'PtInvoicePayment']"/>
+                <link text="Customer &lt;strong&gt;Payments&lt;/strong&gt;" encode="false" url="../Accounting/Payment/FindPayment"
+                        link-type="anchor" parameter-map="[paymentType:'Incoming',paymentTypeEnumId:'PtInvoicePayment']"/>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
 
-            <container style="diagram-sequence-item">
-                <container><link text="Sales Returns &amp; RMA" url="../Return" link-type="anchor" parameter-map="[returnType:'Customer']"/></container>
+            <container style="diagram-sequence-item smaller">
+                <container><link text="Sales Returns &amp; RMA" url="../Return" link-type="anchor" parameter-map="[returnType:'Customer']" style="text-normal"/></container>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <container><link text="Customer Return Shipments" url="../Shipment/FindShipment" link-type="anchor" parameter-map="[shipmentTypeEnumId:'ShpTpSalesReturn']"/></container>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <link text="Payable Return Invoices" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Payable',invoiceTypeEnumId:'InvoiceReturn']"/>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <link text="Outgoing Refund Payments" url="../Accounting/Payment/FindPayment" link-type="anchor" parameter-map="[paymentType:'Outgoing',paymentTypeEnumId:'PtRefund']"/>
                 <container style="fa left" type="i"/>
             </container>
@@ -176,21 +180,21 @@ along with this software (see the LICENSE.md file). If not, see
 
             <container style="diagram-sequence-item">
                 <container>
-                    <link text="Employees" url="../Party/FindParty" link-type="anchor" parameter-map="[roleTypeId:'Employee']"/>
+                    <link text="HR" url="../HumanRes" link-type="anchor"/>
                     <label text=" - "/>
-                    <link text="All Parties" url="../Party" link-type="anchor"/>
+                    <link text="Employees" url="../Party/FindParty" link-type="anchor" parameter-map="[roleTypeId:'Employee']"/>
                 </container>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <container><link text="Requests" url="../Request" link-type="anchor"/></container>
+                <link text="Requests" url="../Request" link-type="anchor" style="text-strong"/>
                 <!-- maybe not, are mostly internal: <container style="fa left" type="i"/><container style="fa right" type="i"/> -->
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <link text="Products" url="../Catalog/Product" link-type="anchor"/>
+                <link text="Products" url="../Catalog/Product" link-type="anchor" style="text-strong"/>
                 <label text=" - "/>
                 <link text="Catalog" url="../Catalog" link-type="anchor"/>
             </container>
@@ -199,7 +203,7 @@ along with this software (see the LICENSE.md file). If not, see
             <container style="diagram-sequence-item">
                 <container>
                     <link text="Assets" url="../Asset" link-type="anchor" style="text-strong"/>
-                    <label text=" &amp; "/>
+                    <label text=" - "/>
                     <link text="Inventory" url="../Asset/Asset/FindSummary" link-type="anchor" parameter-map="[assetTypeEnumId:'AstTpInventory']"/>
                 </container>
                 <container><link text="Manufacturing" url="../Manufacturing" link-type="anchor"/></container>
@@ -207,12 +211,15 @@ along with this software (see the LICENSE.md file). If not, see
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <container><link text="Projects" url="../Project" link-type="anchor"/></container>
+                <container><link text="Projects" url="../Project" link-type="anchor" style="text-strong"/></container>
                 <container><link text="Tasks" url="../Task" link-type="anchor"/></container>
             </container>
             <!-- TODO: Events? what would it go to? most events are context specific, ie for a Party, Facility, Asset, etc -->
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
+            <container style="diagram-sequence-item">
+                <link text="All Parties" url="../Party" link-type="anchor"/>
+            </container>
             <container style="diagram-sequence-item">
                 <container><link text="Facilities" url="../Facility" link-type="anchor"/></container>
                 <container><link text="Stores" url="../ProductStore" link-type="anchor"/></container>
@@ -248,51 +255,56 @@ along with this software (see the LICENSE.md file). If not, see
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
                 <!-- TODO: constrain better -->
-                <container><link text="Purchase Requests" url="../Request" link-type="anchor"/></container>
+                <link text="Purchase &lt;strong&gt;Requests&lt;/strong&gt;" encode="false" url="../Request" link-type="anchor"/>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <container><link text="Purchase Orders &amp; Quotes" url="../Order/FindOrder" link-type="anchor" parameter-map="[orderType:'Purchase']"/></container>
+                <container><link text="Purchase &lt;strong&gt;Orders&lt;/strong&gt; &amp;amp; Quotes" encode="false" url="../Order/FindOrder"
+                        link-type="anchor" parameter-map="[orderType:'Purchase']"/></container>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <container><link text="Purchase Shipments" url="../Shipment/FindShipment" link-type="anchor" parameter-map="[parentShipmentType:'ShpTpIncoming']"/></container>
+                <link text="Purchase &lt;strong&gt;Shipments&lt;/strong&gt;" encode="false" url="../Shipment/FindShipment"
+                        link-type="anchor" parameter-map="[parentShipmentType:'ShpTpIncoming']"/>
                 <container style="fa left" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
             <container style="diagram-sequence-item">
-                <link text="Payable Invoices" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Payable']"/>
+                <link text="Payable &lt;strong&gt;Invoices&lt;/strong&gt;" encode="false" url="../Accounting/Invoice/FindInvoice"
+                        link-type="anchor" parameter-map="[invoiceType:'Payable']"/>
                 <container style="fa left" type="i"/>
             </container>
             <container style="diagram-sequence-item">
-                <link text="Supplier Credit Memos" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Receivable',invoiceTypeEnumId:'InvoiceCreditMemo']"/>
+                <link text="Supplier Credit Memos" url="../Accounting/Invoice/FindInvoice" link-type="anchor"
+                        parameter-map="[invoiceType:'Receivable',invoiceTypeEnumId:'InvoiceCreditMemo']"/>
                 <container style="fa right" type="i"/>
             </container>
             <container style="diagram-sequence-item">
-                <link text="Supplier Payments" url="../Accounting/Payment/FindPayment" link-type="anchor" parameter-map="[paymentType:'Outgoing',paymentTypeEnumId:'PtInvoicePayment']"/>
+                <link text="Supplier &lt;strong&gt;Payments&lt;/strong&gt;" encode="false" url="../Accounting/Payment/FindPayment"
+                        link-type="anchor" parameter-map="[paymentType:'Outgoing',paymentTypeEnumId:'PtInvoicePayment']"/>
                 <container style="fa right" type="i"/>
             </container>
 
             <label text="&amp;nbsp;" encode="false" type="div"/>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <container><link text="Purchase Returns" url="../Return" link-type="anchor" parameter-map="[returnType:'Supplier']"/></container>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <container><link text="Supplier Return Shipments" url="../Shipment/FindShipment" link-type="anchor" parameter-map="[shipmentTypeEnumId:'ShpTpPurchaseReturn']"/></container>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <link text="Receivable Return Invoices" url="../Accounting/Invoice/FindInvoice" link-type="anchor" parameter-map="[invoiceType:'Receivable',invoiceTypeEnumId:'InvoiceReturn']"/>
                 <container style="fa right" type="i"/>
             </container>
-            <container style="diagram-sequence-item">
+            <container style="diagram-sequence-item smaller">
                 <link text="Incoming Refund Payments" url="../Accounting/Payment/FindPayment" link-type="anchor" parameter-map="[paymentType:'Incoming',paymentTypeEnumId:'PtRefund']"/>
                 <container style="fa left" type="i"/>
             </container>
