@@ -15,22 +15,14 @@ along with this software (see the LICENSE.md file). If not, see
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
         default-menu-title="Dashboard" default-menu-index="1" menu-image="fa fa-dashboard" menu-image-type="icon">
 
-    <transition name="search"><default-response url="../Search"/></transition>
-    <transition name="quickLookup"><default-response url="../QuickLookup"/></transition>
-
     <widgets>
-        <container-row><row-col md="6" style="text-center">
-            <form-single name="SearchOptions" transition="search" extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchOptions">
+        <container style="text-center">
+            <form-single name="SearchOptions" transition="../QuickSearch" extends="component://SimpleScreens/screen/SimpleScreens/Search.xml#SearchOptions">
                 <field name="queryString"><default-field tooltip=""><text-line size="25"/></default-field></field>
                 <field-layout><field-row-big justify="center"><field-ref name="documentType"/><field-ref name="queryString"/>
                     <field-ref name="submitButton"/></field-row-big></field-layout>
             </form-single>
-        </row-col><row-col md="6" style="text-center">
-            <form-single name="QuickLookupForm" transition="quickLookup" focus-field=""
-                    extends="component://SimpleScreens/screen/SimpleScreens/QuickLookup.xml#QuickLookupForm">
-                <field-layout><field-row-big justify="center"><field-ref name="lookupId"/><field-ref name="submitButton"/></field-row-big></field-layout>
-            </form-single>
-        </row-col></container-row>
+        </container>
 
         <section name="QuickInfoSection"><actions>
             <entity-find entity-name="mantle.party.PartyRole" list="orgPartyRoles">
@@ -61,7 +53,7 @@ along with this software (see the LICENSE.md file). If not, see
         </actions><widgets>
             <container-row><row-col sm="0" md="1"><label text="&amp;nbsp;" encode="false"/></row-col><row-col sm="5" md="4" style="text-center">
                 <container style="row">
-                    <container style="col"><label text="Sales Orders" type="h4"/></container>
+                    <container style="col"><label text="Sales" type="h4"/></container>
                     <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderPlaced,OrderProcessing', statusId_op:'in']"
                             text="Placed" badge="${orderPlacedCount}" btn-type="default"/></container>
                     <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderApproved,OrderSent', statusId_op:'in']"
