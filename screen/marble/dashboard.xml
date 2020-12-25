@@ -68,27 +68,6 @@ along with this software (see the LICENSE.md file). If not, see
                                 text="In Progress" badge="${requestInProgressCount}" btn-type="default"/></container>
                     </container>
                 </container>
-                <!--
-                <container-row><row-col md="6" style="text-center">
-                    <container style="row">
-                        <container style="col"><label text="Sales" type="h4"/></container>
-                        <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderPlaced,OrderProcessing', statusId_op:'in']"
-                                text="Placed" badge="${orderPlacedCount}" btn-type="default"/></container>
-                        <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderApproved,OrderSent', statusId_op:'in']"
-                                text="Approved" badge="${orderApprovedCount}" btn-type="default"/></container>
-                        <container style="col q-my-auto"><link url="../Order/FindOrder" parameter-map="[orderType:'Sales', statusId:'OrderHold']"
-                                text="Held" badge="${orderHeldCount}" btn-type="default"/></container>
-                    </container>
-                </row-col><row-col md="6" style="text-center">
-                    <container style="row">
-                        <container style="col"><label text="Requests" type="h4"/></container>
-                        <container style="col q-my-auto"><link url="../Request" parameter-map="[statusId:'ReqSubmitted']"
-                                text="Submitted" badge="${requestSubmittedCount}" btn-type="default"/></container>
-                        <container style="col q-my-auto"><link url="../Request" parameter-map="[statusId:'ReqReviewed,ReqInProgress', statusId_op:'in']"
-                                text="In Progress" badge="${requestInProgressCount}" btn-type="default"/></container>
-                    </container>
-                </row-col></container-row>
-                -->
             </widgets></section>
         </row-col></container-row>
 
