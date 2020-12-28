@@ -13,7 +13,7 @@ along with this software (see the LICENSE.md file). If not, see
 <http://creativecommons.org/publicdomain/zero/1.0/>.
 -->
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd"
-        default-menu-title="Marble ERP" menu-image="fa fa-thumbs-up" menu-image-type="icon" server-static="vuet,qvt">
+        default-menu-title="Marble ERP" menu-image="fa fa-cogs" menu-image-type="icon" server-static="vuet,qvt">
 
     <always-actions>
         <set field="appRoot" value="marble"/>
