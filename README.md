@@ -9,7 +9,6 @@
 [![Discourse Forum](https://img.shields.io/badge/moqui%20forum-discourse-blue.svg)](https://forum.moqui.org)
 [![Google Group](https://img.shields.io/badge/google%20group-moqui-blue.svg)](https://groups.google.com/d/forum/moqui)
 [![LinkedIn Group](https://img.shields.io/badge/linked%20in%20group-moqui-blue.svg)](https://www.linkedin.com/groups/4640689)
-[![Gitter Chat at https://gitter.im/moqui/moqui-framework](https://badges.gitter.im/moqui/moqui-framework.svg)](https://gitter.im/moqui/moqui-framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-moqui-blue.svg)](http://stackoverflow.com/questions/tagged/moqui)
 
 Moqui Marble ERP is a planning and management application for businesses that produce goods and services, and sell to individuals (B2C) and organizations (B2B). 
