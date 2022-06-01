@@ -1,5 +1,17 @@
 # Moqui Marble ERP
 
+[![license](http://img.shields.io/badge/license-CC0%201.0%20Universal-blue.svg)](https://github.com/moqui/MarbleERP/blob/master/LICENSE.md)
+[![build](https://travis-ci.org/moqui/MarbleERP.svg)](https://travis-ci.org/moqui/MarbleERP)
+[![release](http://img.shields.io/github/release/moqui/MarbleERP.svg)](https://github.com/moqui/MarbleERP/releases)
+[![commits since release](http://img.shields.io/github/commits-since/moqui/MarbleERP/v2.2.0.svg)](https://github.com/moqui/MarbleERP/commits/master)
+[![downloads](http://img.shields.io/github/downloads/moqui/MarbleERP/total.svg)](https://github.com/moqui/MarbleERP/releases)
+
+[![Discourse Forum](https://img.shields.io/badge/moqui%20forum-discourse-blue.svg)](https://forum.moqui.org)
+[![Google Group](https://img.shields.io/badge/google%20group-moqui-blue.svg)](https://groups.google.com/d/forum/moqui)
+[![LinkedIn Group](https://img.shields.io/badge/linked%20in%20group-moqui-blue.svg)](https://www.linkedin.com/groups/4640689)
+[![Gitter Chat at https://gitter.im/moqui/moqui-framework](https://badges.gitter.im/moqui/moqui-framework.svg)](https://gitter.im/moqui/moqui-framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Stack Overflow](https://img.shields.io/badge/stack%20overflow-moqui-blue.svg)](http://stackoverflow.com/questions/tagged/moqui)
+
 Moqui Marble ERP is a planning and management application for businesses that produce goods and services, and sell to individuals (B2C) and organizations (B2B). 
 
 This is a comprehensive ERP application rather than being focused on goods like POP Commerce ERP or services like HiveMind PM & Admin. Part of the reason for the combination is that goods oriented businesses also have projects and tasks to manage even if they don't sell them, and services oriented businesses also have equipment and supplies to manage even if they don't sell goods.

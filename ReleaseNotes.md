@@ -11,7 +11,7 @@ management of employees, contractors, equipment, supplies, and light manufacturi
 
 For a complete list of changes see:
 
-https://github.com/moqui/MarbleERP/compare/41e7fc5a^...v1.5.0
+https://github.com/moqui/MarbleERP/compare/41e7fc5a...v1.0.0
 
 Most changes come from screens reused from SimpleScreens.
 
