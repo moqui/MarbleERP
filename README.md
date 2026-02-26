@@ -76,7 +76,7 @@ Use the button in the lower-left corner of the screen login as John Doe.
 
 ### Setup Commands Quick Reference
 
-Java 21 JDK is required (Eclipse Temurin): <https://adoptium.net/temurin/releases?version=11&os=any&arch=any>
+Java 11 JDK is required (Eclipse Temurin): <https://adoptium.net/temurin/releases?version=11&os=any&arch=any>
 
 Here are command line steps for initial checkout, setup, and run:
 
