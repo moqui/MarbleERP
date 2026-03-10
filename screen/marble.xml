@@ -59,6 +59,7 @@ along with this software (see the LICENSE.md file). If not, see
         <subscreens-item name="Survey" location="component://SimpleScreens/screen/SimpleScreens/Survey.xml" menu-index="10"/>
 
         <subscreens-item name="Task" location="component://SimpleScreens/screen/SimpleScreens/Task.xml" menu-index="10"/>
+        <subscreens-item name="Team" location="component://SimpleScreens/screen/SimpleScreens/Team.xml" menu-index="10"/>
         <subscreens-item name="Wiki" location="component://SimpleScreens/screen/SimpleScreens/Wiki.xml" menu-index="10"/>
 
         <subscreens-item name="QuickViewReport" menu-title="Custom Reports" menu-index="30"
