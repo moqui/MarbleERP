@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<!-- Install skills for Marble ERP Initial Setup and Basics. Loaded on empty DB
+     (seed,seed-initial,install); not re-applied later so DB edits stick.
+     Assist: POST /apps/marble/... (JSON); Link /qapps/marble/... Never /rest or /popc. -->
+<entity-facade-xml type="install">
+
+    <!-- ========== Company (Internal Organization) ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskCreateOrg" name="create-internal-organization"
+            title="Create Internal Organization"
+            description="Create first Company Internal Organization on Marble ERP Parties FindParty New Organization"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-internal-organization"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create Internal Organization
+Dashboard Internal → `/apps/marble/Party/FindParty` query `roleTypeId=OrgInternal`.
+Dialog **New Organization** POST `/apps/marble/Party/FindParty/createOrganization`
+fields: `organizationName`, hidden `roleTypeId` (from find; must be `OrgInternal`).
+Returns `partyId`. Link `/qapps/marble/Party/EditParty` `{partyId}`.
+If role missing: EditParty **Add Direct Role** POST `createPartyRole` `roleTypeId=OrgInternal`.
+Canvas: Form + Mutation POST. After submitted: request POST, then Link.
+Next: `add-party-contact-info`, `clone-accounting-settings`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskPartyContact" name="add-party-contact-info"
+            title="Add party contact information"
+            description="Add phone email URL postal address on EditParty or EditCustomer contact dialogs"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#add-party-contact-info"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Add contact info
+Screen `/apps/marble/Party/EditParty` or `/apps/marble/Customer/EditCustomer` (`partyId`).
+Phone/Email/URL: **Add New** → dialog `UpdateContactInfo` POST `storeContactInfo`
+(`createTelecom`/`createEmail`/`createWeb`=true). Email purpose `EmailPrimary`.
+Postal: **Add Address** POST `storeContactInfo` `createPostal=true`
+(address1, city, postalCode, countryGeoId, stateProvinceGeoId).
+Canvas Form + Mutation. After submit: request POST. Link `/qapps/marble/.../EditParty` or EditCustomer.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCloneAcctg" name="clone-accounting-settings"
+            title="Clone accounting settings"
+            description="Clone PartyAcctgPreference from DefaultSettings for Internal Organization accounting"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#clone-accounting-settings"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Clone accounting settings
+Accounting dashboard Settings → `/apps/marble/Accounting/OrgSettings/AcctgPreference?partyId=` (must have role `OrgInternal`).
+If no PAP: **Clone Accounting Settings** POST `initPartyAccountingConfiguration`
+fields: `partyId`, `baseCurrencyUomId` (default USD), `localCurrencyUomId` (empty unless different),
+`cogsMethodEnumId=CogsActualCost`, `sourcePartyId=DefaultSettings`.
+Then POST `updatePartyAcctgPreference`: `realTimeGlSummary=Y`, `settlementTermId` (Default Receivables Term).
+Link `/qapps/marble/Accounting/OrgSettings/AcctgPreference?partyId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Customer ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskCreateAcct" name="create-sales-account"
+            title="Create sales account"
+            description="Create first Customer Sales Account organization on FindCustomer New Sales Account"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-sales-account"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create sales account
+Dashboard Customers → `/apps/marble/Customer/FindCustomer`.
+Dialog **New Sales Account (Organization Customer)** POST `createAccount`
+fields: `organizationName`, optional `parentAccountPartyId`.
+Returns `partyId`. Roles: `Customer` and `Account` (Sales Account).
+Link `/qapps/marble/Customer/EditCustomer` `{partyId}`.
+Next: `add-party-contact-info`, optional `add-customer-payment-method`, `add-sales-contact`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskPartyPayMeth" name="add-customer-payment-method"
+            title="Add customer payment method"
+            description="Create Credit Card or Bank Account payment method on Customer EditCustomer"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#add-customer-payment-method"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Add payment method
+`/apps/marble/Customer/EditCustomer` Payment Methods.
+**Create Credit Card** `PmtCreditCard` or **Create Bank Account** `PmtBankAccount`
+→ dialog `UpdatePaymentMethodInfo` POST `storePaymentMethodInfo` (`partyId`, type, card/bank fields).
+PCI: do not store PAN in local DB unless a vault (Authorize.NET CIM) is configured; prefer bank account.
+Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskAddContact" name="add-sales-contact"
+            title="Add sales contact"
+            description="Add or create Sales Account Contact person with ClientBilling role on EditCustomer"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#add-sales-contact"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Add sales contact
+`/apps/marble/Customer/EditCustomer` **Sales Account Contacts**.
+**Add Contact** POST `addContact`: `partyId` (existing Person), `fromRoleTypeId` (`RgpAccountContact` e.g. `ClientBilling`), `accountPartyId`.
+**New Contact** POST `createContact`: `firstName`, `lastName`, `fromRoleTypeId`, `accountPartyId`.
+`ClientBilling` prints the contact on receivable invoices.
+Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Service invoice path ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskCreateEmp" name="create-employee"
+            title="Create employee"
+            description="Create Employee person with Employer Internal Organization on FindParty New Employee"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-employee"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create employee
+Dashboard Employees → `/apps/marble/Party/FindParty` `roleTypeId=Employee`.
+**New Employee** POST `createPersonEmployee`
+fields: `firstName`, `lastName`, optional `pseudoId`/`emailAddress`/phone, `employerPartyId` (Internal Org),
+optional `userGroupId` (groupType `UgtMarbleErp`).
+Adds role `Employee` and relationship to employer. Password: Reset Password / Account Detail (System) — not Assist.
+Or add `Employee` role to the Initial Admin person on FindParty.
+Link `/qapps/marble/Party/EditParty?partyId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCreateProj" name="create-project"
+            title="Create project"
+            description="Create WorkEffort project with Client sales account and Vendor Internal Org"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-project"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create project
+Dashboard Projects → `/apps/marble/Project/FindProject`.
+**New Project** POST `createProject`
+fields: short `workEffortId` (task ID prefix), `workEffortName`,
+`clientPartyId` (Sales Account), `vendorPartyId` (Internal Org), optional `purposeEnumId` (parent `WetProject`).
+Type `WetProject`. Link `/qapps/marble/Project/EditProject?workEffortId=`.
+Next: `create-work-task`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCreateTask" name="create-work-task"
+            title="Create work task"
+            description="Create project Task on FindTask New Task with assign, priority, status"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-work-task"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create work task
+Dashboard Tasks → `/apps/marble/Task/FindTask`.
+**New Task** POST `createTask`
+fields: `rootWorkEffortId` (Project), `assignToPartyId`, `workEffortName`, `priority` (1 high–9 low, default 5),
+`purposeEnumId` (default `WepTask`), `statusId` (`WeInPlanning`/`WeApproved`/`WeInProgress`), optional due/hours/`description`.
+Type `WetTask`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskLaborRate" name="add-labor-rate"
+            title="Add labor rate"
+            description="Add Rate Amount Standard Client Billing on HumanRes Labor Rates"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#add-labor-rate"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Add labor rate
+Dashboard HR → Labor Rates `/apps/marble/HumanRes/EditRateAmounts`.
+**Add Rate Amount** POST `createRateAmount`
+fields: `rateTypeEnumId=RatpStandard`, `ratePurposeEnumId=RaprClient` (Client Billing),
+`timePeriodUomId=TF_hr`, optional `workEffortId`/`partyId`, `rateAmount`, `rateCurrencyUomId`.
+Link `/qapps/marble/HumanRes/EditRateAmounts`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskTimeEntry" name="record-time-entry"
+            title="Record time entry"
+            description="Record Time or Clock In hours on My Account Time or Party Task time entries"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#record-time-entry"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Record time entry
+Prefer My Account Time `/apps/my/User/TimeEntries` **Record Time**
+→ `EditTimeEntry` POST `recordTimeEntry`
+fields: `clientPartyId` (Employer=Internal Org), `workEffortId` (Task), `fromDate` + `hours` (or thru), `comments`.
+Clock In POST `clockInTimeEntry`. Also Task/Party Time under marble.
+After add, edit dialog: Client Hour Calc should match `add-labor-rate`.
+Link `/qapps/my/User/TimeEntries`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskProjInvoice" name="create-project-client-invoice"
+            title="Create project client invoice"
+            description="Invoice project time entries then Finalize receivable InvoiceInProcess to InvoiceFinalized"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-project-client-invoice"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Project client invoice
+Project Time Entries `/apps/marble/Project/ProjectTimeEntries?workEffortId=`.
+**Project Client Invoice** POST `createProjectInvoiceItems`
+fields: `workEffortId`, optional `thruDate`, `entryGrouping=entry` (Item Per Time Entry; `worker`/`all` also valid).
+Review `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType=Receivable`.
+Finalize: EditInvoice status flow POST `updateStatus` `statusId=InvoiceFinalized` (GL posts). From `InvoiceInProcess`.
+Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Physical-good invoice path ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskCreateProd" name="create-asset-product"
+            title="Create asset product and price"
+            description="Create Product PtAsset Inventory finished good and Current Purchase price"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-asset-product"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create product and price
+Dashboard Products → `/apps/marble/Catalog/Product/FindProduct`.
+**New Product** POST `createProduct`: `productName`, `productTypeEnumId=PtAsset`, `ownerPartyId=_NA_`.
+EditProduct POST `updateProduct`: `assetTypeEnumId=AstTpInventory`, `assetClassEnumId=AsClsInventoryFin`.
+Prices tab POST `createProductPrice`: `priceTypeEnumId=PptCurrent`, `pricePurposeEnumId=PppPurchase`, `price`, `priceUomId`, optional vendor/customer/`minQuantity`.
+Link `/qapps/marble/Catalog/Product/EditProduct?productId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCreateFac" name="create-warehouse"
+            title="Create warehouse facility"
+            description="Create Facility warehouse FcTpWarehouse on FindFacility New Facility"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-warehouse"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create warehouse
+Dashboard Facilities → `/apps/marble/Facility/FindFacility`.
+**New Facility** POST `createFacility`
+fields: optional `pseudoId`, `facilityName`, `facilityTypeEnumId=FcTpWarehouse`, optional `ownerPartyId` (Internal Org).
+Link `/qapps/marble/Facility/EditFacility?facilityId=`.
+Next: `create-product-store`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCreateStore" name="create-product-store"
+            title="Create product store"
+            description="Create ProductStore for Internal Org with Facility and Auto Reservation On Order Placed"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-product-store"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create product store
+Dashboard Stores → `/apps/marble/ProductStore/FindProductStore`.
+**New Store** POST `createStore`: optional `productStoreId`, `storeName`, `organizationPartyId` (Internal Org).
+EditStore POST `updateStore`: `inventoryFacilityId`, `reservationAutoEnumId=AsResAutoPlaced` (On Order Placed),
+`defaultCurrencyUomId` (e.g. USD).
+Link `/qapps/marble/ProductStore/EditProductStore?productStoreId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskReceiveInv" name="receive-inventory-direct"
+            title="Receive inventory direct"
+            description="Receive Direct inventory Asset AstAvailable without purchase order or shipment"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#receive-inventory-direct"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Receive inventory (shortcut)
+Dashboard Inventory → `/apps/marble/Asset/Asset/FindSummary` `assetTypeEnumId=AstTpInventory`.
+**Receive Direct** POST `receiveAsset`
+fields: `productId`, `statusId=AstAvailable`, `quantity`, `facilityId`, `ownerPartyId` (Internal Org), `acquireCost` (required without PO).
+Prefer PO + incoming shipment + payable invoice for real bookkeeping.
+Link `/qapps/marble/Asset/Asset/FindSummary`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskSalesOrder" name="create-sales-order"
+            title="Create sales order"
+            description="Create Sales Order add product item Place and Approve on FindOrder OrderDetail"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-sales-order"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create sales order
+Dashboard Sales Orders → `/apps/marble/Order/FindOrder` `orderType=Sales`.
+**Create Sales Order** POST `createOrder`: `productStoreId`, `vendorPartyId` (from store), `facilityId`, `customerPartyId`.
+Starts `OrderOpen`. OrderDetail **Add Product Item** POST `addProductItem` (`productId`, `quantity`; leave `unitAmount` empty for Calc Price).
+**Place** / **Place Warnings** POST `placeOrder` → `OrderPlaced`.
+**Approve** / **Approve Warnings** POST `approveOrder` → `OrderApproved` (needs ORDER_APPROVE).
+Link `/qapps/marble/Order/OrderDetail?orderId=`. Next: `ship-sales-order`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskShipOrder" name="ship-sales-order"
+            title="Ship sales order"
+            description="Create Shipment Issue Pack Set Packed Set Shipped for outgoing sales order"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#ship-sales-order"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Ship sales order
+OrderDetail POST `shipOrderPart` (**Create Shipment**) → `shipmentId`.
+ShipmentDetail `/apps/marble/Shipment/ShipmentDetail?shipmentId=`.
+Items **Issue & Pack** POST `packItemSource` (defaults). Then **Set Packed** POST `packShipment` (`packedDate`)
+→ `ShipPacked`; creates receivable invoice `InvoiceFinalized`.
+**Set Shipped** POST `shipShipment` (`actualStartDate`) → `ShipShipped`.
+Outgoing flow: Input/Scheduled → Packed (required) → Shipped.
+Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Payment and reports ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskRecvPayment" name="receive-invoice-payment"
+            title="Receive invoice payment"
+            description="New Payment for Invoice on unpaid Finalized receivable to InvoicePmtRecvd"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#receive-invoice-payment"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Receive payment
+Find unpaid Finalized `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType=Receivable` `statusId=InvoiceFinalized`.
+EditInvoice **New Payment for Invoice** POST `recordPayment`
+fields: `invoiceId`, `statusId` (`PmntPromised` default; `PmntDelivered` if already received),
+`amount`, `effectiveDate` (GL date), `paymentInstrumentEnumId`, optional `paymentMethodId`.
+Applied until unpaid $0; invoice → `InvoicePmtRecvd`.
+Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskAcctgReport" name="review-accounting-reports"
+            title="Review accounting reports"
+            description="Run Income Statement and Balance Sheet; Recalc All GL summaries if empty"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#review-accounting-reports"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Accounting reports
+`/apps/marble/Accounting/Reports/ReportList`.
+If empty (no per-transaction GL summary): Time Period `/apps/marble/Accounting/TimePeriod/FindTimePeriod`
+→ current year Accounts `/apps/marble/Accounting/TimePeriod/ViewPeriodGlAccounts` **Recalc All** POST `recalculateAllAmounts` `organizationPartyId`.
+**Income Statement** GET `viewIncomeStatement`; **Balance Sheet** GET `viewBalanceSheet`
+fields: `organizationPartyId` (Internal Org), `timePeriodIdList`, `detail=true`, percents.
+Link `/qapps/marble/Accounting/Reports/ReportList`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Concept reference ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskRefParty" name="marble-party-roles"
+            title="Marble party roles and concepts"
+            description="Party Person Organization roles OrgInternal Customer Account Supplier Employee invoice From To"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#marble-party-roles"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Party roles
+Party = Person or Organization. Direct roles (`RgpDirect`) tell the system how to treat the party.
+- `OrgInternal` Internal Organization (your company)
+- `Customer` + `Account` Sales Account (org customer)
+- Sales Contact: Person related `PrtContact`; roles `RgpAccountContact` e.g. `ClientBilling`
+- `Supplier`, `Employee` (employment class is separate)
+Order: Vendor vs Customer. Invoice: From vs To. Receivable From=`OrgInternal`; Payable To=`OrgInternal`.
+Find: `/apps/marble/Party/FindParty` with `roleTypeId`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskRefOrderShip" name="marble-order-shipment-status"
+            title="Order and shipment statuses"
+            description="OrderOpen OrderPlaced OrderApproved shipment ShipPacked ShipShipped outgoing invoice"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#marble-order-shipment-status"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Order status (`OrderHeader`)
+`OrderOpen` Open (Tentative) → `OrderPlaced` (Customer) → `OrderApproved` (Vendor) → `OrderCompleted`.
+Also: `OrderRequested`/`OrderProposed` quotes; `OrderHold`; `OrderCancelled`/`OrderRejected`; `OrderSent` (PO).
+Sales: Vendor=Internal Org. Screens: `/apps/marble/Order/FindOrder` `orderType=Sales`.
+# Shipment
+`ShipInput` `ShipScheduled` `ShipPicked` `ShipPacked` `ShipShipped` `ShipDelivered` (`ShipCancelled`/`ShipRejected`).
+Outgoing: Packed required; Packed creates receivable invoice. Incoming: Delivered receives and may create payable invoice.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskRefInvPmt" name="marble-invoice-payment-status"
+            title="Invoice and payment statuses"
+            description="InvoiceInProcess InvoiceFinalized InvoicePmtRecvd PmntPromised PmntDelivered payable receivable"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#marble-invoice-payment-status"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Receivable invoice
+`InvoiceInProcess` → **Finalize** `InvoiceFinalized` (GL post, immutable) → optional Sent/Acked → `InvoicePmtRecvd`.
+# Payable
+`InvoiceIncoming` → `InvoiceReceived` → **Approve** `InvoiceApproved` (GL) → `InvoicePmtSent`.
+Find `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType=Receivable|Payable`.
+# Payment
+`PmntProposed` `PmntPromised` `PmntAuthorized` `PmntDelivered` `PmntConfirmed`; fail: Cancelled/Void/Declined.
+Incoming To=Internal Org. Apply Payment or credit memo (reversed From/To) to settle invoice.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskRefProdAsset" name="marble-product-asset-types"
+            title="Product asset and work types"
+            description="PtAsset PtService AstTpInventory AsClsInventoryFin AstAvailable WetProject WetTask WeInProgress"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#marble-product-asset-types"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# ProductType
+`PtAsset` Asset (Good), `PtService`, `PtDigital`, `PtDigitalAsset`, `PtAssetUse`, `PtFacilityUse`, `PtVirtual`, `PtPickAssembly`, `PtConfigurable`.
+# Asset Type / Class (on Product)
+Inventory: `AstTpInventory` + `AsClsInventoryFin` (Finished Good). Also Raw `AsClsInventoryRaw`, Sub `AsClsInventorySub`.
+# Asset status — only `AstAvailable` may be reserved/issued/sold.
+Also Incoming, On Hold, Returned, Promised, Delivered, In Transfer, Defective, Quarantine, Morgue.
+# WorkEffort
+Type `WetProject`/`WetTask`. Status `WeInPlanning` `WeApproved` `WeInProgress` `WeOnHold` `WeComplete` `WeClosed` `WeCancelled`.
+Screens: `/apps/marble/Catalog/Product/FindProduct`, `/apps/marble/Asset/Asset/FindSummary`, `/apps/marble/Project/FindProject`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+</entity-facade-xml>
