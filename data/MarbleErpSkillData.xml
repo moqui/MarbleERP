@@ -28,6 +28,7 @@ along with this software (see the LICENSE.md file). If not, see
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create Internal Organization
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Internal → `/apps/marble/Party/FindParty` query `roleTypeId=OrgInternal`.
 Dialog **New Organization** POST `/apps/marble/Party/FindParty/createOrganization`
 fields: `organizationName`, hidden `roleTypeId` (from find; must be `OrgInternal`).
@@ -47,6 +48,7 @@ Next: `add-party-contact-info`, `clone-accounting-settings`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Add contact info
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Screen `/apps/marble/Party/EditParty` or `/apps/marble/Customer/EditCustomer` (`partyId`).
 Phone/Email/URL: **Add New** → dialog `UpdateContactInfo` POST `storeContactInfo`
 (`createTelecom`/`createEmail`/`createWeb`=true). Email purpose `EmailPrimary`.
@@ -65,6 +67,7 @@ Canvas Form + Mutation. After submit: request POST. Link `/qapps/marble/.../Edit
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Clone accounting settings
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Accounting dashboard Settings → `/apps/marble/Accounting/OrgSettings/AcctgPreference?partyId=` (must have role `OrgInternal`).
 If no PAP: **Clone Accounting Settings** POST `initPartyAccountingConfiguration`
 fields: `partyId`, `baseCurrencyUomId` (default USD), `localCurrencyUomId` (empty unless different),
@@ -85,6 +88,7 @@ Link `/qapps/marble/Accounting/OrgSettings/AcctgPreference?partyId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create sales account
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Customers → `/apps/marble/Customer/FindCustomer`.
 Dialog **New Sales Account (Organization Customer)** POST `createAccount`
 fields: `organizationName`, optional `parentAccountPartyId`.
@@ -103,6 +107,7 @@ Next: `add-party-contact-info`, optional `add-customer-payment-method`, `add-sal
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Add payment method
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 `/apps/marble/Customer/EditCustomer` Payment Methods.
 **Create Credit Card** `PmtCreditCard` or **Create Bank Account** `PmtBankAccount`
 → dialog `UpdatePaymentMethodInfo` POST `storePaymentMethodInfo` (`partyId`, type, card/bank fields).
@@ -120,6 +125,7 @@ Link `/qapps/marble/Customer/EditCustomer?partyId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Add sales contact
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 `/apps/marble/Customer/EditCustomer` **Sales Account Contacts**.
 **Add Contact** POST `addContact`: `partyId` (existing Person), `fromRoleTypeId` (`RgpAccountContact` e.g. `ClientBilling`), `accountPartyId`.
 **New Contact** POST `createContact`: `firstName`, `lastName`, `fromRoleTypeId`, `accountPartyId`.
@@ -139,6 +145,7 @@ Link `/qapps/marble/Customer/EditCustomer?partyId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create employee
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Employees → `/apps/marble/Party/FindParty` `roleTypeId=Employee`.
 **New Employee** POST `createPersonEmployee`
 fields: `firstName`, `lastName`, optional `pseudoId`/`emailAddress`/phone, `employerPartyId` (Internal Org),
@@ -158,6 +165,7 @@ Link `/qapps/marble/Party/EditParty?partyId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create project
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Projects → `/apps/marble/Project/FindProject`.
 **New Project** POST `createProject`
 fields: short `workEffortId` (task ID prefix), `workEffortName`,
@@ -176,6 +184,7 @@ Next: `create-work-task`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create work task
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Tasks → `/apps/marble/Task/FindTask`.
 **New Task** POST `createTask`
 fields: `rootWorkEffortId` (Project), `assignToPartyId`, `workEffortName`, `priority` (1 high–9 low, default 5),
@@ -193,6 +202,7 @@ Type `WetTask`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Add labor rate
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard HR → Labor Rates `/apps/marble/HumanRes/EditRateAmounts`.
 **Add Rate Amount** POST `createRateAmount`
 fields: `rateTypeEnumId=RatpStandard`, `ratePurposeEnumId=RaprClient` (Client Billing),
@@ -210,6 +220,7 @@ Link `/qapps/marble/HumanRes/EditRateAmounts`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Record time entry
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Prefer My Account Time `/apps/my/User/TimeEntries` **Record Time**
 → `EditTimeEntry` POST `recordTimeEntry`
 fields: `clientPartyId` (Employer=Internal Org), `workEffortId` (Task), `fromDate` + `hours` (or thru), `comments`.
@@ -228,6 +239,7 @@ Link `/qapps/my/User/TimeEntries`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Project client invoice
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Project Time Entries `/apps/marble/Project/ProjectTimeEntries?workEffortId=`.
 **Project Client Invoice** POST `createProjectInvoiceItems`
 fields: `workEffortId`, optional `thruDate`, `entryGrouping=entry` (Item Per Time Entry; `worker`/`all` also valid).
@@ -248,6 +260,7 @@ Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create product and price
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Products → `/apps/marble/Catalog/Product/FindProduct`.
 **New Product** POST `createProduct`: `productName`, `productTypeEnumId=PtAsset`, `ownerPartyId=_NA_`.
 EditProduct POST `updateProduct`: `assetTypeEnumId=AstTpInventory`, `assetClassEnumId=AsClsInventoryFin`.
@@ -265,6 +278,7 @@ Link `/qapps/marble/Catalog/Product/EditProduct?productId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create warehouse
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Facilities → `/apps/marble/Facility/FindFacility`.
 **New Facility** POST `createFacility`
 fields: optional `pseudoId`, `facilityName`, `facilityTypeEnumId=FcTpWarehouse`, optional `ownerPartyId` (Internal Org).
@@ -282,6 +296,7 @@ Next: `create-product-store`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create product store
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Stores → `/apps/marble/ProductStore/FindProductStore`.
 **New Store** POST `createStore`: optional `productStoreId`, `storeName`, `organizationPartyId` (Internal Org).
 EditStore POST `updateStore`: `inventoryFacilityId`, `reservationAutoEnumId=AsResAutoPlaced` (On Order Placed),
@@ -292,17 +307,19 @@ Link `/qapps/marble/ProductStore/EditProductStore?productStoreId=`.
 
     <moqui.llm.LlmSkill skillId="MskReceiveInv" name="receive-inventory-direct"
             title="Receive inventory direct"
-            description="Receive Direct inventory Asset AstAvailable without purchase order or shipment"
+            description="Direct inventory receive only if asked with no PO; else purchase order incoming shipment payable"
             riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
             warrant="Marble ERP User Guide: Initial Setup and Basics"
             sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#receive-inventory-direct"
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
-# Receive inventory (shortcut)
+# Receive inventory (direct, not first)
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Do not offer this shortcut first. Real receipts: `create-supplier`, `create-purchase-order`, `receive-incoming-shipment`, then `approve-payable-invoice` and `pay-supplier`.
+Use this only when the user explicitly wants inventory with no purchase order and no shipment.
 Dashboard Inventory → `/apps/marble/Asset/Asset/FindSummary` `assetTypeEnumId=AstTpInventory`.
 **Receive Direct** POST `receiveAsset`
-fields: `productId`, `statusId=AstAvailable`, `quantity`, `facilityId`, `ownerPartyId` (Internal Org), `acquireCost` (required without PO).
-Prefer PO + incoming shipment + payable invoice for real bookkeeping.
+fields: `productId`, `statusId=AstAvailable`, `quantity`, `facilityId`, `ownerPartyId` (activeOrgId), `acquireCost` (required without PO).
 Link `/qapps/marble/Asset/Asset/FindSummary`.
 ]]></body>
     </moqui.llm.LlmSkill>
@@ -316,6 +333,7 @@ Link `/qapps/marble/Asset/Asset/FindSummary`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Create sales order
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Dashboard Sales Orders → `/apps/marble/Order/FindOrder` `orderType=Sales`.
 **Create Sales Order** POST `createOrder`: `productStoreId`, `vendorPartyId` (from store), `facilityId`, `customerPartyId`.
 Starts `OrderOpen`. OrderDetail **Add Product Item** POST `addProductItem` (`productId`, `quantity`; leave `unitAmount` empty for Calc Price).
@@ -334,6 +352,7 @@ Link `/qapps/marble/Order/OrderDetail?orderId=`. Next: `ship-sales-order`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Ship sales order
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 OrderDetail POST `shipOrderPart` (**Create Shipment**) → `shipmentId`.
 ShipmentDetail `/apps/marble/Shipment/ShipmentDetail?shipmentId=`.
 Items **Issue & Pack** POST `packItemSource` (defaults). Then **Set Packed** POST `packShipment` (`packedDate`)
@@ -355,6 +374,7 @@ Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Receive payment
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 Find unpaid Finalized `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType=Receivable` `statusId=InvoiceFinalized`.
 EditInvoice **New Payment for Invoice** POST `recordPayment`
 fields: `invoiceId`, `statusId` (`PmntPromised` default; `PmntDelivered` if already received),
@@ -366,13 +386,14 @@ Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
 
     <moqui.llm.LlmSkill skillId="MskAcctgReport" name="review-accounting-reports"
             title="Review accounting reports"
-            description="Run Income Statement and Balance Sheet; Recalc All GL summaries if empty"
+            description="Income Statement Balance Sheet Recalc All; last month invoices by TimePeriod FiscalMonth"
             riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
             warrant="Marble ERP User Guide: Initial Setup and Basics"
             sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#review-accounting-reports"
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Accounting reports
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 `/apps/marble/Accounting/Reports/ReportList`.
 If empty (no per-transaction GL summary): Time Period `/apps/marble/Accounting/TimePeriod/FindTimePeriod`
 → current year Accounts `/apps/marble/Accounting/TimePeriod/ViewPeriodGlAccounts` **Recalc All** POST `recalculateAllAmounts` `organizationPartyId` (a write; confirm first).
@@ -381,6 +402,257 @@ Balance Sheet: `run_service` `mantle.ledger.LedgerReportServices.run#BalanceShee
 Do not GET the HTML report screens.
 fields: `organizationPartyId` (Internal Org), `timePeriodIdList`, `detail=true`, percents.
 Link `/qapps/marble/Accounting/Reports/ReportList`.
+# Invoiced last month
+GET `/apps/marble/Accounting/TimePeriod/FindTimePeriod/actions/TimePeriodList` `partyId`=activeOrgId `timePeriodTypeId`=FiscalMonth.
+Use the row whose `fromDate`/`thruDate` cover last month (`timePeriodId`, `isClosed`).
+Then GET `/apps/marble/Accounting/Invoice/FindInvoice/actions/InvoiceList` `invoiceType`=Receivable `fromPartyId`=activeOrgId
+`invoiceDate_from`/`invoiceDate_thru` from that period (find field `invoiceDate`),
+or `run_service` `mantle.ledger.LedgerReportServices.run#IncomeStatement` with `organizationPartyId`=activeOrgId and that `timePeriodIdList`.
+Canvas BarChart of the totals (BarChart is already on the canvas). Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+Before finalize (`updateStatus` `InvoiceFinalized`), payment (`recordPayment`), or **Recalc All**, read `messages` on the tool result.
+If a message says the period is closed, repeat that warning in the confirm sentence. Do not add a tool.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Open work, procure-to-pay, returns ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskOpenWork" name="my-open-work"
+            title="My open work"
+            description="Open tasks time sales orders shipments invoices requests picklists for the logged-in user and company"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#my-open-work"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# My open work
+Read only. No sim. No confirm. GET each Find form-list the user can browse. Skip a path browse does not show.
+Prefer `/apps/marble/...`. If browse returns another app's mount of the same screen, use that path (HiveMind mounts Task at `/apps/hm/Task`; do not assume Order, Shipment, or Invoice exist under `/apps/hm`).
+Use `partyId` and `activeOrgId` only on fields those screens actually have. Do not guess the company.
+Canvas: short counts, one table, and Links (`/qapps/...`).
+- Tasks GET `/apps/marble/Task/FindTask/actions/ListTasks` `partyId`=session partyId (Assigned To). No `activeOrgId` field. Open `statusId` `WeInPlanning,WeApproved,WeInProgress,WeOnHold` `statusId_op`=in. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
+- Time GET `/apps/my/User/TimeEntries/actions/TimeEntryList`. My Account already filters to the logged-in `partyId` (not a find field here). `clientPartyId`=activeOrgId (Employer). Link `/qapps/my/User/TimeEntries`.
+- Sales orders GET `/apps/marble/Order/FindOrder/actions/OrderList` `orderType`=Sales `partStatusId`=`OrderPlaced,OrderApproved` `partStatusId_op`=in `vendorPartyId`=activeOrgId. Find field is `partStatusId`, not `statusId`. Dashboard Placed also includes `OrderProcessing`; Approved also includes `OrderSent`. Link `/qapps/marble/Order/OrderDetail?orderId=`.
+- Outgoing shipments GET `/apps/marble/Shipment/FindShipment/actions/ShipmentList` `parentShipmentType`=`ShpTpOutgoing` (screen actions, not a column) `statusId`=`ShipInput,ShipScheduled,ShipPicked` `statusId_op`=in. Form field `shipmentTypeEnumId`. `fromPartyId`=activeOrgId when that field is the company. Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`.
+- Receivable invoices GET `/apps/marble/Accounting/Invoice/FindInvoice/actions/InvoiceList` `invoiceType`=Receivable `fromPartyId`=activeOrgId `statusId`=`InvoiceInProcess,InvoiceFinalized,InvoiceSent,InvoiceAcked` `statusId_op`=in. Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+- Requests GET `/apps/marble/Request/FindRequest/actions/ListRequests`. Party find field is `findPartyId` (not `partyId`). Mine: `findPartyId`=session partyId `roleTypeId`=Assignee. Dashboard customer queue: `roleTypeId`=Customer `statusId`=`ReqSubmitted` or `ReqReviewed,ReqInProgress`. Link `/qapps/marble/Request/EditRequest?requestId=`.
+- Picklists GET `/apps/marble/Shipping/Picklist/FindPicklist/actions/PicklistList` `partyId`=session partyId (Person) `ownerPartyId`=activeOrgId. Link `/qapps/marble/Shipping/Picklist/PicklistDetail?workEffortId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskSupplier" name="create-supplier"
+            title="Create supplier"
+            description="Find or create Supplier organization on FindSupplier New Organization Supplier"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-supplier"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create supplier
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Dashboard Suppliers → `/apps/marble/Supplier/FindSupplier`. Screen sets `roleTypeId`=Supplier.
+GET `actions/SupplierListForm` `organizationName` or `combinedName` (extends PartyListForm). Create only when nothing matches.
+**New Organization Supplier** POST `createOrganization` fields: `organizationName`, hidden `roleTypeId`=Supplier.
+**New Person Supplier** POST `createPerson` (CreatePersonForm: `firstName`, `lastName`, same hidden `roleTypeId`). Do not post card numbers.
+Returns `partyId`. Link `/qapps/marble/Supplier/EditSupplier?partyId=`.
+EditSupplier is not EditParty. Do not use `add-party-contact-info` transitions here.
+Next: `create-purchase-order`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskPurchOrder" name="create-purchase-order"
+            title="Create purchase order"
+            description="Create Purchase Order add product item Place Approve Order Sent on FindOrder OrderDetail"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-purchase-order"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create purchase order
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Dashboard Purchase Orders → `/apps/marble/Order/FindOrder` `orderType`=Purchase.
+The company is Customer Org, not the Vendor. `customerPartyId`=activeOrgId. `vendorPartyId`=supplier (`create-supplier`). Do not put activeOrgId in `vendorPartyId` (that mapping is the sales order only).
+**Create Purchase Order** POST `createOrder` fields on CreatePurchaseOrder only: `vendorPartyId`, `customerPartyId`, `facilityId`, optional `shipBeforeDate`, `estimatedDeliveryDate`. No `productStoreId` (that field is CreateSalesOrder).
+Starts `OrderOpen`. OrderDetail **Add Product Item** POST `addProductItem` (`orderId`, `orderPartSeqId`, `productId`, `quantity`; leave `unitAmount` empty for Calc Price). Purchase shows `standardCost` and `itemTypeEnumId` default `ItemInventory`.
+**Place** / **Place Warnings** POST `placeOrder` → `OrderPlaced`.
+**Approve** / **Approve Warnings** POST `approveOrder` → `OrderApproved` (needs ORDER_APPROVE).
+**Order Sent** POST `sendOrder` → `OrderSent` (button only when the customer is an internal org).
+Link `/qapps/marble/Order/OrderDetail?orderId=`. Next: `receive-incoming-shipment`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskRecvShip" name="receive-incoming-shipment"
+            title="Receive incoming shipment"
+            description="Create purchase shipment Receive Entire or Receive Product then Delivered payable invoice"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#receive-incoming-shipment"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Receive incoming shipment
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Do not use `receive-inventory-direct` first. Do not call listAssets. Incoming has no Set Packed (`packShipment` is outgoing only).
+From the purchase order (`OrderApproved` or `OrderSent`, quantity not shipped): OrderDetail **Create Shipment** POST `shipOrderPart` `orderId`, `orderPartSeqId`. That shipment is `ShpTpPurchase` (parent `ShpTpIncoming`).
+Or find GET `/apps/marble/Shipment/FindShipment/actions/ShipmentList` `parentShipmentType`=`ShpTpIncoming`.
+**New Incoming Shipment** POST `createShipment` fields: `shipmentTypeEnumId` (incoming type), `fromPartyId` (supplier), `destinationFacilityId`, `estimatedArrivalDate`. Prefer `shipOrderPart` when a PO exists.
+ShipmentDetail `/apps/marble/Shipment/ShipmentDetail?shipmentId=`.
+`ShipInput`: **Set Scheduled** POST `scheduleShipment` → `ShipScheduled`.
+Receive inventory: **Receive Entire Shipment** POST `receiveEntireShipment` `shipmentId` (shown for incoming `ShipScheduled`, `ShipPacked`, or `ShipShipped`). Receives remaining quantity and sets `ShipDelivered`. Delivered creates the payable invoice.
+One product: **Receive Product** POST `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/receive` (form ReceiveForm) `shipmentId`, `productId`, `statusId`=`AstAvailable`, `quantityAccepted`, `ownerPartyId` (activeOrgId when the order did not set an owner), `acquireCost`. Then **Set Delivered** POST `deliverShipment` `shipmentId`, `actualArrivalDate` (form SetDeliveredForm). Do not use UpdateItemAsset `updateAsset` to receive; that updates an existing asset.
+Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`. Next: `approve-payable-invoice`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskApprPayable" name="approve-payable-invoice"
+            title="Approve payable invoice"
+            description="Payable invoice Receive then Approve InvoiceApproved on EditInvoice status flow"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#approve-payable-invoice"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Approve payable invoice
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Find `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType`=Payable `toPartyId`=activeOrgId (To Organization). From is the supplier.
+Purchase shipment Delivered creates this invoice. A payable from a non-internal From party starts `InvoiceIncoming`.
+EditInvoice `/apps/marble/Accounting/Invoice/EditInvoice?invoiceId=`. Status buttons are the InvoicePayable flow POST `updateStatus` with `invoiceId` and `statusId` (not a separate approve transition).
+`InvoiceIncoming` **Receive** → `InvoiceReceived`, or **Approve** → `InvoiceApproved` (needs INVOICE_APPROVE).
+`InvoiceReceived` **Approve** → `InvoiceApproved` (GL posts). **Acknowledged** → `InvoiceAcked` is optional.
+Do not post `InvoiceFinalized` on a payable (that is the receivable flow).
+**Payment Sent** (`InvoicePmtSent`) is a status only. To pay, use `pay-supplier`.
+Before Approve, read `messages` on the tool result. If a message says the period is closed, repeat that warning in the confirm sentence.
+Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskPaySupplier" name="pay-supplier"
+            title="Pay supplier"
+            description="Outgoing PtInvoicePayment From internal org To supplier for a payable invoice"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#pay-supplier"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Pay supplier
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+The paying company is activeOrgId. Do not guess another company. Do not post card numbers.
+Confirm text must name amount, supplier, and invoiceId before the write.
+Find the payable `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType`=Payable `statusId`=`InvoiceApproved` `toPartyId`=activeOrgId. Supplier is the invoice From party.
+Same call as `receive-invoice-payment`, outgoing: EditInvoice **New Payment for Invoice** POST `recordPayment`
+fields: `invoiceId`, `amount`, `statusId` (`PmntPromised` default; `PmntDelivered` if already sent), `effectiveDate`, `paymentInstrumentEnumId`.
+The service sets payment From=invoice To (activeOrgId), To=invoice From (supplier), type `PtInvoicePayment`. Do not send a different `toPartyId`. `PmntDelivered` applies the payment; unpaid 0 on an approved invoice sets `InvoicePmtSent`.
+Find outgoing payments GET `/apps/marble/Accounting/Payment/FindPayment/actions/PaymentList` `paymentType`=Outgoing `paymentTypeEnumId`=`PtInvoicePayment` `fromPartyId`=activeOrgId.
+**New Outgoing Payment** has no `invoiceId`. POST `createPayment` `fromPartyId`=activeOrgId, `toPartyId`=supplier, `amount`, `paymentTypeEnumId`=`PtInvoicePayment`, `effectiveDate` (starts `PmntPromised`).
+Then EditPayment **Deliver** POST `updateStatus` `statusId`=`PmntDelivered`, then form UnpaidInvoiceList POST `applyInvoicePayment` `paymentId`, `invoiceId`, `amount` (only when Delivered).
+Before the payment, read `messages`. If a message says the period is closed, repeat that warning in the confirm sentence.
+Link `/qapps/marble/Accounting/Payment/EditPayment?paymentId=` and `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskCustRequest" name="create-customer-request"
+            title="Create customer request"
+            description="Create or update customer Request on FindRequest and EditRequest status flow"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-customer-request"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Customer request
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Dashboard Customer Requests → `/apps/marble/Request/FindRequest` (Request defaults to FindRequest).
+GET `actions/ListRequests` before create. Party filter is `findPartyId`, not `partyId`.
+**New Request** POST `createRequest` fields: `customerPartyId`, optional `productStoreId`, `rootWorkEffortId`, `facilityId`, `assignToPartyId` (empty assigns the current user), `priority`, `responseRequiredDate`, `requestTypeEnumId` (default `RqtSupport`), `statusId` (default `ReqSubmitted`), `requestName`, `description`.
+EditRequest POST `updateRequest` updates name, description, `assignToPartyId`, `priority`, `responseRequiredDate`, `requestTypeEnumId`, `requestResolutionEnumId`. It has no status field.
+Status only by EditRequest status-flow POST `updateStatus` `requestId` and `statusId`: **Submit** `ReqSubmitted`, **Reviewed** `ReqReviewed`, **Start Progress** `ReqInProgress`, **Complete** `ReqCompleted`, **Cancel** `ReqCancelled`, **Re-open** back to `ReqInProgress`. Use only the button the current status shows.
+Link `/qapps/marble/Request/EditRequest?requestId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskSalesQuote" name="create-sales-quote"
+            title="Create sales quote"
+            description="Sales order createOrder then Quote Requested or Propose Quote on OrderDetail"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-sales-quote"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Sales quote
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+There is no separate quote screen. A quote is a sales order left in `OrderRequested` or `OrderProposed`.
+Dashboard Sales Orders and Quotes → `/apps/marble/Order/FindOrder` `orderType`=Sales.
+Vendor is the company: `vendorPartyId`=activeOrgId. Do not guess another company.
+**Create Sales Order** POST `createOrder`: `productStoreId`, `vendorPartyId`, `facilityId`, `customerPartyId`. Starts `OrderOpen`.
+OrderDetail **Add Product Item** POST `addProductItem` (`productId`, `quantity`; leave `unitAmount` empty for Calc Price).
+`OrderOpen`: **Quote Requested** POST `requestOrder` → `OrderRequested`.
+`OrderOpen` or `OrderRequested`: **Propose Quote** POST `proposeOrder` → `OrderProposed`.
+`OrderRequested`: **Reject Quote Request** POST `rejectOrder` → `OrderRejected`.
+Do not POST `placeOrder` unless the user wants a placed order (`create-sales-order`).
+Link `/qapps/marble/Order/OrderDetail?orderId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskSalesReturn" name="process-sales-return"
+            title="Process sales return"
+            description="Customer return RMA shipment ShpTpSalesReturn credit memo refund; supplier return is the same screens"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#process-sales-return"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Sales return
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Vendor on a customer return is the company: `vendorPartyId`=activeOrgId. Do not post card numbers.
+Find GET `/apps/marble/Return/FindReturn/actions/ReturnHeaderList` `returnType`=Customer.
+**Create Customer Return** POST `createReturn` (form CreateReturn): `customerPartyId`, `vendorPartyId`=activeOrgId, `facilityId`.
+Or OrderDetail **Create Return** POST `createReturnFromOrder` `orderId`, `orderPartSeqId`.
+EditReturn: **Set Requested** POST `requestReturn` (`ReturnCreated` → `ReturnRequested`). **Approve** POST `approveReturn` (`ReturnApproved`). **Cancel** POST `cancelReturn`.
+Add lines `/apps/marble/Return/AddOrderItems` form AddOrderItemToReturn POST `addOrderItemToReturn`: `returnId`, `orderId`, `orderItemSeqId`, `returnQuantity` or `responseAmount`, `returnReasonEnumId`, `returnResponseEnumId`, `responseImmediate` (`N` on received, `Y` on approved).
+Response enum: `RrspCredit` Credit, `RrspRefund` Refund, `RrspReplace` Replace, `RrspManual` Manual. Set it with EditReturnItems form ReturnItemList POST `updateReturnItem`.
+**Create Return Shipment** POST `createReturnShipment` `returnId`. Customer return shipment is `ShpTpSalesReturn` (incoming). Find `/apps/marble/Shipment/FindShipment` `shipmentTypeEnumId`=`ShpTpSalesReturn`. Receive that shipment with `receive-incoming-shipment` (`receiveEntireShipment` or ReceiveItem `receive`), not `receive-inventory-direct`.
+**Process Item Responses** POST `processReturnItemResponses`. Credit becomes a credit memo; Refund becomes payment type `PtRefund`. **Receive without Shipment** POST `receiveReturnWithoutShipment` only if the user wants no shipment.
+Find credit memos `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType`=Payable `invoiceTypeEnumId`=`InvoiceCreditMemo`. Return invoices: `invoiceType`=Payable `invoiceTypeEnumId`=`InvoiceReturn`.
+Manual credit on an unpaid invoice: EditInvoice **New Credit Memo** POST `createCreditMemo` `originalInvoiceId`, `amount`, `description`, `itemTypeEnumId`, `invoiceDate`.
+Or FindInvoice **Customer Credit Memo** POST `createInvoice` with `invoiceTypeEnumId`=`InvoiceCreditMemo` (From customer, To activeOrgId).
+Refund already taken on a Delivered payment: EditPayment **Create Refund** POST `createRefundPayment` `paymentId`, `amount`, `statusId` (default `PmntPromised`). Find `/apps/marble/Accounting/Payment/FindPayment` `paymentType`=Outgoing `paymentTypeEnumId`=`PtRefund`.
+# Purchase return
+Same screens. **Create Supplier Return** POST `createReturn` (form CreateSupplierReturn): `vendorPartyId`=supplier, `customerPartyId`=activeOrgId, `facilityId`. Find `returnType`=Supplier.
+Shipment is `ShpTpPurchaseReturn` (outgoing, not an incoming receive). Do not POST `receiveEntireShipment` on it. Pack and ship with `packShipment` / `shipShipment` only if those outgoing buttons are on the shipment.
+Return invoice find: `invoiceType`=Receivable `invoiceTypeEnumId`=`InvoiceReturn`. Refund find: `paymentType`=Incoming `paymentTypeEnumId`=`PtRefund`.
+Link `/qapps/marble/Return/EditReturn?returnId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskUpdateTask" name="update-work-task"
+            title="Update work task"
+            description="Update task status assignee and due date on TaskSummary EditTask EditUsers FindTask"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#update-work-task"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Update work task
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Find GET `/apps/marble/Task/FindTask/actions/ListTasks`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
+Status: TaskSummary POST `updateTaskStatus` `workEffortId`, `statusId`. Load allowed values with `getTaskStatuses` (flow from the current status only). EditTask POST `updateTask` has the same flow-limited `statusId` dropdown. Do not post a status the control does not offer. WorkEffort statuses: `WeInPlanning` `WeApproved` `WeInProgress` `WeOnHold` `WeComplete` `WeClosed` `WeCancelled`.
+Due date is `estimatedCompletionDate` (yyyy-MM-dd). TaskSummary shows it and has no due-date transition. POST EditTask `updateTask`, or FindTask selected **Update** form UpdateTaskSelected POST `updateTask` (also `statusId`, `priority`).
+Assignee is not a field on TaskSummary or EditTask. Task/EditUsers **Add Person** POST `addAssignment` `workEffortId`, `partyId`, `roleTypeId`=`Assignee`, `statusId`=`WeptAssigned` (WorkEffortParty default on that form). FindTask **Assign** POST `addWorkEffortParty` with the same party fields.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskAddNote" name="add-record-note"
+            title="Add a note"
+            description="Add note on party or order, or a comment on a task or request"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#add-record-note"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Add a note
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Party: EditParty **Add Note** POST `createPartyNote` `partyId`, `noteText`. Link `/qapps/marble/Party/EditParty?partyId=`.
+Order: OrderDetail **Add Note** POST `createNote` `orderId`, `noteText`. Link `/qapps/marble/Order/OrderDetail?orderId=`.
+Task has no note transition. TaskSummary **Add Comment** POST `addComment` `workEffortId`, `subject`, `body`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
+Request also has a note: EditRequest **Add Note** POST `createNote` `requestId`, `noteText`, and **Add Comment** POST `addComment` `requestId`, `subject`, `body`.
+Shipment screens have no note or comment transition; do not invent one.
 ]]></body>
     </moqui.llm.LlmSkill>
 
