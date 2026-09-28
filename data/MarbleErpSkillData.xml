@@ -106,7 +106,7 @@ Next: `add-party-contact-info`, optional `add-customer-payment-method`, `add-sal
 `/apps/marble/Customer/EditCustomer` Payment Methods.
 **Create Credit Card** `PmtCreditCard` or **Create Bank Account** `PmtBankAccount`
 → dialog `UpdatePaymentMethodInfo` POST `storePaymentMethodInfo` (`partyId`, type, card/bank fields).
-PCI: do not store PAN in local DB unless a vault (Authorize.NET CIM) is configured; prefer bank account.
+Do not POST cardNumber. Prefer a bank account. The dialog transition is `UpdatePaymentMethodInfo/storePaymentMethodInfo`, not a transition on EditCustomer itself.
 Link `/qapps/marble/Customer/EditCustomer?partyId=`.
 ]]></body>
     </moqui.llm.LlmSkill>
@@ -367,7 +367,7 @@ Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
     <moqui.llm.LlmSkill skillId="MskAcctgReport" name="review-accounting-reports"
             title="Review accounting reports"
             description="Run Income Statement and Balance Sheet; Recalc All GL summaries if empty"
-            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
             warrant="Marble ERP User Guide: Initial Setup and Basics"
             sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#review-accounting-reports"
             version="1" worldSuccessCount="0" simSuccessCount="0">
@@ -375,8 +375,10 @@ Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
 # Accounting reports
 `/apps/marble/Accounting/Reports/ReportList`.
 If empty (no per-transaction GL summary): Time Period `/apps/marble/Accounting/TimePeriod/FindTimePeriod`
-→ current year Accounts `/apps/marble/Accounting/TimePeriod/ViewPeriodGlAccounts` **Recalc All** POST `recalculateAllAmounts` `organizationPartyId`.
-**Income Statement** GET `viewIncomeStatement`; **Balance Sheet** GET `viewBalanceSheet`
+→ current year Accounts `/apps/marble/Accounting/TimePeriod/ViewPeriodGlAccounts` **Recalc All** POST `recalculateAllAmounts` `organizationPartyId` (a write; confirm first).
+Income Statement: `run_service` `mantle.ledger.LedgerReportServices.run#IncomeStatement`.
+Balance Sheet: `run_service` `mantle.ledger.LedgerReportServices.run#BalanceSheet`.
+Do not GET the HTML report screens.
 fields: `organizationPartyId` (Internal Org), `timePeriodIdList`, `detail=true`, percents.
 Link `/qapps/marble/Accounting/Reports/ReportList`.
 ]]></body>
