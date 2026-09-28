@@ -81,7 +81,7 @@ Link `/qapps/marble/Accounting/OrgSettings/AcctgPreference?partyId=`.
 
     <moqui.llm.LlmSkill skillId="MskCreateAcct" name="create-sales-account"
             title="Create sales account"
-            description="Create first Customer Sales Account organization on FindCustomer New Sales Account"
+            description="Create business customer Sales Account organization on FindCustomer New Sales Account"
             riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
             warrant="Marble ERP User Guide: Initial Setup and Basics"
             sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-sales-account"
@@ -89,6 +89,7 @@ Link `/qapps/marble/Accounting/OrgSettings/AcctgPreference?partyId=`.
         <body><![CDATA[
 # Create sales account
 Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+A person, retail, or consumer customer is `create-person-customer`.
 Dashboard Customers → `/apps/marble/Customer/FindCustomer`.
 Dialog **New Sales Account (Organization Customer)** POST `createAccount`
 fields: `organizationName`, optional `parentAccountPartyId`.
@@ -127,10 +128,35 @@ Link `/qapps/marble/Customer/EditCustomer?partyId=`.
 # Add sales contact
 Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
 `/apps/marble/Customer/EditCustomer` **Sales Account Contacts**.
-**Add Contact** POST `addContact`: `partyId` (existing Person), `fromRoleTypeId` (`RgpAccountContact` e.g. `ClientBilling`), `accountPartyId`.
+**Add Contact** POST `addContact`: `partyId` (existing Person), `fromRoleTypeId` (`RgpAccountContact` e.g. `ClientBilling`), `accountPartyId`. EditCustomer only.
 **New Contact** POST `createContact`: `firstName`, `lastName`, `fromRoleTypeId`, `accountPartyId`.
+FindCustomer **New Sales Contact** POST `/apps/marble/Customer/FindCustomer/createContact` with the same fields. `accountPartyId` is chosen on that form. FindCustomer has no `addContact`.
 `ClientBilling` prints the contact on receivable invoices.
 Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskPersonCust" name="create-person-customer"
+            title="Create person or retail customer"
+            description="Create person customer retail consumer on FindCustomer New Person Customer and other customer classes"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-person-customer"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create person or retail customer
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Dashboard Customers → `/apps/marble/Customer/FindCustomer`.
+GET `actions/CustomerListForm` `firstName`, `lastName`, or `combinedName`. Create only when nothing matches.
+Dialog **New Person Customer** POST `createPersonCustomer`.
+`roleTypeId` stays `Customer` (hidden). `partyClassificationId` default `CustConsumer` (Consumer, retail).
+Other classes only when the user names that class: `CustWholesale` Wholesale, `CustRetailStore` (Wholesale - Retail Store, a wholesale buyer), `CustProfessional`, `CustDistributor`, `CustDistributorPref`, `CustEnterprise`, `CustBroker`, `CustEmployee` (a class, not the Employee role).
+fields: `firstName`, `lastName`, optional `emailAddress`, phone `countryCode`/`areaCode`/`contactNumber`, postal `address1` `unitNumber` `address2` `city` `countryGeoId` `stateProvinceGeoId` `postalCode` `postalCodeExt`.
+Optional `accountPartyId` (existing Sales Account) adds role `Contact` and `PrtContact` from-role `Contact`. That is not a billing contact.
+Do not send `cardNumber` or `newPassword`. The dialog has neither field.
+Returns `partyId`. Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+A company or business customer is `create-sales-account`. A billing contact is `add-sales-contact`.
+Next: `add-party-contact-info` for more contact methods, optional `add-customer-payment-method`.
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -656,6 +682,29 @@ Shipment screens have no note or comment transition; do not invent one.
 ]]></body>
     </moqui.llm.LlmSkill>
 
+    <!-- ========== Create party ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskCreateParty" name="create-party"
+            title="Create party"
+            description="Pick the skill for a sales account, sales contact, person or retail customer, employee, supplier, or internal organization"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#create-party"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Create party
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Do not POST a customer, employee, supplier, or internal organization from this skill. Classify the party, then `find_skill` `select` the matching name and follow that skill.
+- Company / internal organization: `create-internal-organization`
+- Business or organization customer, sales account: `create-sales-account`
+- Person at a sales account (billing or other account-contact role): `add-sales-contact`
+- Retail, consumer, or other person customer: `create-person-customer`
+- Employee: `create-employee`
+- Supplier (organization or person): `create-supplier`
+Only when none of those fit and the user already named another role: `/apps/marble/Party/FindParty` **New Person** POST `createPerson` (`firstName`, `lastName`, hidden `roleTypeId`) or **New Organization** POST `createOrganization` (`organizationName`, hidden `roleTypeId`). Use the `roleTypeId` already on that find. Do not use this fallback for a customer, employee, supplier, or internal organization.
+]]></body>
+    </moqui.llm.LlmSkill>
+
     <!-- ========== Concept reference ========== -->
 
     <moqui.llm.LlmSkill skillId="MskRefParty" name="marble-party-roles"
@@ -667,10 +716,12 @@ Shipment screens have no note or comment transition; do not invent one.
             version="1" worldSuccessCount="0" simSuccessCount="0">
         <body><![CDATA[
 # Party roles
-Party = Person or Organization. Direct roles (`RgpDirect`) tell the system how to treat the party.
-- `OrgInternal` Internal Organization (your company)
+Create a party with `create-party`.
+Party = Person or Organization. Direct roles (`RgpDirect`):
+- Person customer: role `Customer`, class `CustConsumer` (retail/consumer) or another customer class
+- `OrgInternal` your company
 - `Customer` + `Account` Sales Account (org customer)
-- Sales Contact: Person related `PrtContact`; roles `RgpAccountContact` e.g. `ClientBilling`
+- Sales Contact: `PrtContact`; roles `RgpAccountContact` e.g. `ClientBilling`
 - `Supplier`, `Employee` (employment class is separate)
 Order: Vendor vs Customer. Invoice: From vs To. Receivable From=`OrgInternal`; Payable To=`OrgInternal`.
 Find: `/apps/marble/Party/FindParty` with `roleTypeId`.
