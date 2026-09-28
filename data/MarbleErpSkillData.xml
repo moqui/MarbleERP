@@ -420,6 +420,7 @@ Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
         <body><![CDATA[
 # Accounting reports
 Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+A sales dashboard or order and invoice summary is `order-invoice-reports`. Cash flow, ratios, and the account ledger are `ledger-accounting-reports`.
 `/apps/marble/Accounting/Reports/ReportList`.
 If empty (no per-transaction GL summary): Time Period `/apps/marble/Accounting/TimePeriod/FindTimePeriod`
 → current year Accounts `/apps/marble/Accounting/TimePeriod/ViewPeriodGlAccounts` **Recalc All** POST `recalculateAllAmounts` `organizationPartyId` (a write; confirm first).
@@ -437,6 +438,132 @@ or `run_service` `mantle.ledger.LedgerReportServices.run#IncomeStatement` with `
 Canvas BarChart of the totals (BarChart is already on the canvas). Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
 Before finalize (`updateStatus` `InvoiceFinalized`), payment (`recordPayment`), or **Recalc All**, read `messages` on the tool result.
 If a message says the period is closed, repeat that warning in the confirm sentence. Do not add a tool.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <!-- ========== Analytics ========== -->
+
+    <moqui.llm.LlmSkill skillId="MskReportBuilder" name="report-builder"
+            title="Report builder"
+            description="SimpleReport DataDocument custom report fields conditions view export"
+            riskId="LskConfirm" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#report-builder"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Report builder
+Before this write: if the prompt lists a QuickSearch or QuickLookup actions path, GET it and create only when nothing matches.
+Report Builder `/apps/marble/SimpleReport` (FindReport, EditReport, ViewReport). Custom Reports `/apps/marble/QuickViewReport`. Parent hides `moqui.*` entities. If browse shows `/apps/hm`, use that mount.
+GET `/apps/marble/SimpleReport/FindReport/actions/DataDocumentList` `dataDocumentId`, `documentName`, `primaryEntityName` (`DataDocumentAndUserGroup`, user's groups only).
+View GET `/apps/marble/SimpleReport/ViewReport/actions/DataViewList` (same form on QuickViewReport) `dataDocumentId`. Dynamic entity `DataDocument.{dataDocumentId}` is a relational view, not ElasticSearch. CSV and XLSX are on that form.
+Download JSON `DocumentExport.json` `fromUpdateStamp`, `thruUpdateStamp`, `prettyPrint`.
+If the user is not in `DataDocumentUserGroup` for that id, the screen refuses. Do not invent another path.
+**Create Report** POST `/apps/marble/SimpleReport/FindReport/createDataDocument` (`org.moqui.impl.EntityServices.create#DataDocument`).
+fields: `dataDocumentId` (match `[A-Z]\w*`, must not already be an entity name), `documentName`, `primaryEntityName` (full entity name, not `moqui.*`), `userGroupId` (one of the current user's groups).
+**Update** POST `EditReport/updateDataDocument`: `documentName`, `primaryEntityName`, and `userGroupId` only when the document has a single group.
+Fields on `EditReport/FieldList`. **Add field** POST `createDataDocumentField`: `dataDocumentId`, `fieldPath` (primary field, or relationship names joined with `:`, e.g. `items:product:productName`). Optional `fieldNameAlias` (stored camel case; required when two paths would share a name), `functionName` one of `min` `max` `sum` `avg` `count` `count-distinct` `upper` `lower`.
+Update POST `updateDataDocumentField` (`fieldSeqId`). Delete POST `deleteDataDocumentField`.
+**Add Condition** POST `createDataDocumentCondition`. Operators: `equals` `not-equals` `less` `greater` `less-equals` `greater-equals` `in` `not-in` `between` `not-between` `like` `not-like` `is-null` `is-not-null`. The condition field is an alias of a field already on the document. This screen ignores `postQuery`.
+`indexName` is for search indexing. Viewing the report does not query ElasticSearch.
+Link `/qapps/marble/SimpleReport/EditReport?dataDocumentId=` or `/qapps/marble/QuickViewReport?dataDocumentId=`.
+A saved DataDocument is not a substitute for Accounting/Reports. Those screens already exist.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskOrderInvRpt" name="order-invoice-reports"
+            title="Order and invoice reports"
+            description="Sales summary dashboard orders invoices aging top products ElasticSearch"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#order-invoice-reports"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Order and invoice reports
+Read only. No sim. No confirm.
+GL income statement and balance sheet: `review-accounting-reports`. Inventory on hand: `inventory-asset-reports`.
+# Sales Summary (ElasticSearch)
+Screen `/apps/marble/Accounting/Reports/SalesSummary`. Link `/qapps/marble/Accounting/Reports/SalesSummary`.
+For a dashboard, summary, trend, or how-are-sales question, `run_service` the four services below. Do not GET the screen to scrape charts. Stat cards and charts are templates over those results.
+If the tool message says ElasticSearch is not available or no ElasticClient, say that and use the relational reports below.
+Summary Options, pass the same values into the services. `interval`: `d` day, `w` week, `M` month, `q` quarter, `y` year. Screen defaults `interval=w` and `intervalCount=13`. Services default `interval=M`, so a call that should match the screen must pass `w`. `thruDate` defaults to today. `maPeriods` default `0` (moving-average lookback; `0` disables it).
+Filters: `vendorPartyIds` (role `OrgInternal`), `productStoreIds`, `customerClassificationIds` (`PcltCustomer`), `customerPartyIds`, `productIds` (finished inventory `AsClsInventoryFin`). Empty vendor means every vendor in the index. Set `vendorPartyIds` to `activeOrgId` when the user means this company.
+The screen passes `vendorPartyIds` as invoice `fromPartyIds` and `customerPartyIds` as `toPartyIds`.
+Services are `mantle.sales.SalesReportServices`, cluster `default`, index name default `mantle_sales` (the real index is the DataDocument index).
+`get#SalesOrderSummary` reads `MantleSalesOrderItem` on `placedDate`. Status filter on both `partStatusId` and `statusId`: `OrderPlaced` `OrderProcessing` `OrderApproved` `OrderSent` `OrderCompleted` `OrderHold`. Date histogram, newest bucket first, then the list is reversed.
+Aggregations: cardinality of `orderId`; sum of `itemSaleTotal`; `ItemProduct` (`itemTypeEnumId=ItemProduct`) sums `itemSaleTotal`, `issuances.issuedSaleTotal`, `issuances.issuedCostTotal`, `orderQuantity`; discount filter sums `itemSaleTotal` for `ItemDiscount` `ItemPromptDiscount` `ItemCouponCredit` `ItemPromoDiscount` `ItemFreeFills` `ItemSlottingFees` `ItemAdjAdvertising` `ItemAdjJointAdv`; new customers are `isNewCustomer=Y` and a cardinality of `orderId`.
+`netSales` is product sales plus the discount total (discount item amounts are negative). `discountPercent` is `-discountTotal/productSaleTotal`. `costPercent` is issued cost over issued sales. `newCustomerPercent` is new-customer orders over order count.
+`get#SalesInvoiceSummary` reads `MantleSalesInvoice` and `MantleSalesInvoiceItem` on `invoiceDate`. Statuses: `InvoiceFinalized` `InvoiceSent` `InvoiceAcked` `InvoicePmtRecvd` (not in process). Header sums: `invoiceTotal`, `appliedPaymentsTotal` (paid), `prePaymentsTotal`. Item side: cardinality of `invoiceId`, `ItemProduct` sums of `itemSaleTotal`, issued sale, issued cost, and `quantity`, plus the same discount types. `paidPercent` is payments applied over `invoiceTotal`. `prePaidPercent` is prepayments over `invoiceTotal`.
+`get#SalesTopProduct` is one period, `poffset=-1` (the previous period, not the current one). Screen passes `topLimit=15` (service default `10`). Terms on `productId`. Fields: `totalSales`, `totalQuantity`, `productIssuedTotal`, `productCostTotal`, `costPercent`. Margin percent is `1 - costPercent`.
+`get#InvoicesByCustomerClass` is that same previous period. Terms on `customerClassId`. Header totals from `MantleSalesInvoice`, item totals from `MantleSalesInvoiceItem`.
+Out maps `ordersThis` `ordersLast` `ordersPrior` `ordersAverage` and the invoice twins. This is the current open period and is excluded from Prior Total and Prior Average. Last is the previous complete period. Prior is the one before that.
+The summary lists end with two rows whose `dateKey` is `Prior Average` and `Prior Total`. Drop those two before a trend chart.
+Stat cards are this versus last versus average: order count, new customer count, new customer percent, order quantity, order product sales, order discount percent, order net product, invoice count, invoiced quantity, invoices total, paid percent, pre-paid percent, invoice cost percent, invoice discount percent.
+Four charts, no titles. Series: orders, new customers, new customer percent, invoices; product ordered, order discounts, discount percent; product invoiced, invoice discounts, product cost; order discount percent, invoice discount percent, invoice cost percent.
+A product filter leaves invoice-level stats empty (invoice total, paid, pre-paid). Those fields are on `MantleSalesInvoice`, which has no product. Product quantity, product sales, cost, and discount still come from the item document. Say that when the user filters by product.
+For last week or last month, use `ordersLast` or `invoicesLast` with that `interval`. `ordersThis` is the period still in progress.
+Screen tables if a GET is useful after the services: `TopProductList`, `SalesOrderSummaryList`, `TopCustomerClassList`, `SalesInvoiceSummaryList`.
+# Relational reports
+Database views. GET `actions/{form}` on the screen. Use these when ElasticSearch is down, or when the user wants a grouped table rather than the dashboard.
+Sales Order Analysis `/apps/marble/Accounting/Reports/SalesAnalysis` form `SalesAnalysis`, entity `mantle.order.OrderItemSalesSummary`. Vendor role fixed `OrgInternal`. Same placed-through-hold statuses. Item types are product items (`EngItemsProduct`). Default `placedDate` this month (`placedDate_poffset=0`, `placedDate_period=month`). Filters: placed date, vendor, customer, store, product. Includes `totalSales` and `totalCost`.
+Sales Invoice Analysis `/SalesInvoiceAnalysis` form `SalesInvoiceAnalysis`, entity `mantle.account.invoice.InvoiceItemSalesSummary`. Same invoice statuses. Product item types. Default asset class `AsClsInventoryFin`. Filter `invoiceDate`, product, store.
+Order Item Summary `/OrderItemSummary` form `OrderItemSummary`, entity `mantle.order.OrderItemAndPartSummary`. Default `orderType=Sales`, statuses `OrderApproved,OrderSent,OrderCompleted`, `placedDate` previous month (`poffset=-1`). Sales sets vendor role `OrgInternal`. Purchase sets customer role `OrgInternal`. Columns include min, max, and average amount and quantity.
+Order Issued and Invoiced `/OrderIssuedInvoiced` form `OrderIssuedInvoiced`, entity `mantle.order.OrderItemShipBillSummary`. Default statuses `OrderApproved,OrderCompleted,OrderHold`. Compare `issuedQuantity` and `billedQuantity`.
+Invoice Item Summary `/InvoiceItemSummary` form `InvoiceItemSummary`, entity `mantle.account.invoice.InvoiceItemSummary`. `invoiceType` `Receivable` or `Payable`. Default statuses cover the receivable finalized set and the payable approved set.
+Invoice Aging Detail `/InvoiceAgingDetail` form `InvoiceAgingList`, entity `mantle.account.invoice.InvoicePaymentApplicationSummary`. `invoiceType` Receivable (statuses `InvoiceFinalized,InvoiceSent,InvoiceAcked,InvoicePmtRecvd,InvoiceWriteOff`) or Payable (`InvoiceApproved,InvoicePmtSent,InvoiceBilledThrough`). `periodDays` default `30`. Age by `invoiceDate` or `dueDate`. `asOfDate` is the end of that day. Buckets: current, then four `periodDays` spans, then older.
+AR Aging Summary `/ArAgingSummary` form `InvoiceAgingList` (same form name, different screen), same invoice entity plus unapplied payments (`PaymentAndApplicationSummary`). Age by due date or invoice date. Columns include unpaid and overpaid (unapplied).
+Quick Aging is `/apps/marble/Invoice/Aging`, not under Reports.
+Invoice Reconciliation `/InvoiceReconciliation` ties out one `timePeriodId`: invoice payments versus GL, payment applications versus GL, accounting transactions not posted, debits not equal to credits, GL activity with no invoice, and payment applications dated after the invoice. Use it when invoices and the ledger disagree.
+Customer Statement PDF (`receivableStatement` on ReportList) downloads a PDF. Fields `fromPartyId`, `toPartyId`, `asOfDate`. It is not a summary query.
+Link `/qapps/marble/Accounting/Reports/{name}`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskAssetRpt" name="inventory-asset-reports"
+            title="Inventory and asset reports"
+            description="Inventory valuation on hand receipt asset status shipment packages"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#inventory-asset-reports"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Inventory and asset reports
+Read only. No sim. No confirm.
+Sales trends are `order-invoice-reports`. Menu `/apps/marble/Accounting/Reports/ReportList`.
+Three screens reuse the form name `AssetOnHandSummary`. GET the full screen path.
+On Hand GET `/apps/marble/Accounting/Reports/AssetOnHand/actions/AssetOnHandSummary`, entity `mantle.product.asset.AssetOnHandSummary`, detail from `AssetOnHandDetail`. Filters: product, owner, facility, location, asset, order, shipment, invoice.
+On Hand Summary GET `/apps/marble/Accounting/Reports/AssetOnHandSummary/actions/AssetOnHandSummary`, same summary entity, grouped. Also received date, shipment, return, issuance, receipt, physical inventory.
+Status by Receipt GET `/apps/marble/Accounting/Reports/AssetStatusByReceipt/actions/AssetOnHandSummary`, entity `mantle.product.asset.AssetAndDetailSummary`. Received date, owner, facility, location, product. Columns are asset statuses, not a quantity-on-hand total.
+Inventory Valuation `/AssetValuation` form `AssetValuationSummary`, entity `mantle.product.asset.AssetValuationSummary`. Product, facility, manufacturer. `quantityOnHandDiff` is the quantity column.
+Receipt Transactions `/AssetReceiptTransaction` form `AssetReceiptTxList`, entity `mantle.ledger.transaction.AcctgTransEntryReceiptSummary`. Default `transactionDate` this month and `debitCreditFlag=D`. Filters: facility, posted, transaction type, organization, other party, shipment, order, invoice, asset, product, lot, GL account. Quantity received and unit cost.
+Shipment Package Summary `/ShipmentPackageSummary` form `ShipmentPackageSummary`, entity `mantle.shipment.ShipmentPackageSummary`. Actual date, from or to party, origin or destination facility, product, shipment status and type, order, return, box type. Packages, not inventory valuation.
+Paths are under `/apps/marble/Accounting/Reports/`. Link `/qapps/marble/Accounting/Reports/{name}`.
+]]></body>
+    </moqui.llm.LlmSkill>
+
+    <moqui.llm.LlmSkill skillId="MskLedgerRpt" name="ledger-accounting-reports"
+            title="Ledger accounting reports"
+            description="Cash flow retained earnings financial ratios account ledger posted amounts GL"
+            riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
+            warrant="Marble ERP User Guide: Initial Setup and Basics"
+            sourceLocation="component://MarbleERP/data/MarbleErpSkillData.xml#ledger-accounting-reports"
+            version="1" worldSuccessCount="0" simSuccessCount="0">
+        <body><![CDATA[
+# Ledger accounting reports
+Read only. No sim. No confirm.
+Income Statement, Balance Sheet, last-month invoiced totals, **Recalc All**, and a closed-period warning stay on `review-accounting-reports`. Do not POST `recalculateAllAmounts` from this skill.
+Financial statement screens are HTML. Do not GET them. `run_service` `mantle.ledger.LedgerReportServices` with `organizationPartyId` (internal org; `activeOrgId` when the user means this company) and `timePeriodIdList`.
+Find the period the same way as `review-accounting-reports`: GET `/apps/marble/Accounting/TimePeriod/FindTimePeriod/actions/TimePeriodList` `partyId`=activeOrgId `timePeriodTypeId`=`FiscalMonth` (or `FiscalQuarter` or `FiscalYear`) and use the row that covers the range. `childOrgPeriods` defaults false.
+Cash Flow: `run#CashFlowStatement`. Also `detail`. No percent-of-revenue flag.
+Retained Earnings: `run#RetainedEarningsStatement`. No `detail`.
+Financial Ratios: `run#FinancialRatios`. No `detail`.
+Charts on ReportList (revenue and expense, current assets and liabilities, net income, balance sheet, net income year over year) are the same GL totals, not separate services. Link `/qapps/marble/Accounting/Reports/ReportList`.
+# Transaction reports
+Account Ledger: `run_service` `get#AccountLedgerInfo`. Required `glAccountIdList` and one `timePeriodId`. Optional `organizationPartyId`, `showReverses` default false. Result list is `entryInfoList`. Do not GET the HTML screen.
+Account Balance History: GET `/apps/marble/Accounting/Reports/AccountBalance/actions/AccountBalanceHistory`, entity `mantle.ledger.report.GlAccountOrgTimePeriodSummary`. Fields `organizationPartyId`, `timePeriodTypeId` (`FiscalYear` `FiscalQuarter` `FiscalMonth`), `glAccountId`.
+Posted Amount Summary: `run_service` `run#PostedAmountSummary`. Required `organizationPartyId`, optional `fromDate` and `thruDate` (the screen field `dateRange`). Result `resultList` has `debitAmount` and `creditAmount` by GL account. Currency comes from the organization's accounting preference.
+Posted Balance Summary: GET `/apps/marble/Accounting/Reports/PostedBalanceSummary/actions/ResultList`, entity `mantle.ledger.report.GlAccountOrgTimePeriodDetail`. Fields `organizationPartyId` and one `timePeriodId`.
+A single transaction or entry is `/apps/marble/Accounting/Transaction` and `FindTransactionEntry`, not these summaries.
+Invoice versus GL is `order-invoice-reports` (Invoice Reconciliation).
 ]]></body>
     </moqui.llm.LlmSkill>
 
