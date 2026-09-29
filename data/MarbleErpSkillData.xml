@@ -36,6 +36,9 @@ Returns `partyId`. Link `/qapps/marble/Party/EditParty` `{partyId}`.
 If role missing: EditParty **Add Direct Role** POST `createPartyRole` `roleTypeId=OrgInternal`.
 Canvas: Form + Mutation POST. After submitted: request POST, then Link.
 Next: `add-party-contact-info`, `clone-accounting-settings`.
+## Widgets
+Form `/apps/marble/Party/FindParty` `CreateOrganizationForm` POST `createOrganization`.
+- organizationName text-line size 60
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -55,6 +58,30 @@ Phone/Email/URL: **Add New** → dialog `UpdateContactInfo` POST `storeContactIn
 Postal: **Add Address** POST `storeContactInfo` `createPostal=true`
 (address1, city, postalCode, countryGeoId, stateProvinceGeoId).
 Canvas Form + Mutation. After submit: request POST. Link `/qapps/marble/.../EditParty` or EditCustomer.
+## Widgets
+Form `/apps/marble/Party/EditParty/UpdateContactInfo` `UpdateContactInfo` POST `storeContactInfo`.
+- postalContactMechPurposeId drop-down "Address Purpose" default PostalPrimary entity mantle.party.contact.ContactMechPurpose key contactMechPurposeId text ${description} and contactMechTypeEnumId=CmtPostalAddress order description
+- toName text-line size 50
+- attnName text-line "Attention" size 50
+- address1 text-line size 30
+- unitNumber text-line size 8
+- address2 text-line "Address 2" size 50
+- city text-line "City" size 16
+- countryGeoId drop-down find_basic moqui.basic.Geo key geoId text ${geoName} and geoTypeEnumId=GEOT_COUNTRY order geoName
+- stateProvinceGeoId drop-down Lookup GET `/apps/marble/Party/EditParty/UpdateContactInfo/getGeoCountryStates` valueField geoId depends countryGeoId
+- postalCode text-line "Zip/Postal Code" size 8
+- postalCodeExt text-line "Zip/Postal Code Extension" size 4
+- telecomContactMechId drop-down "Select Phone" entity mantle.party.contact.PartyContactMechTelecomNumber key contactMechId text TelecomNumberSimpleTemplate and partyId=<partyId> date-filter
+- telecomContactMechPurposeId drop-down "Phone Purpose" default PhonePrimary entity mantle.party.contact.ContactMechPurpose key contactMechPurposeId text ${description} and contactMechTypeEnumId=CmtTelecomNumber order description
+- countryCode text-line "Country Code" default pref TelecomNumber.DefaultCountryCode or 1 size 3 maxlength 3
+- areaCode text-line "Area Code" size 3 maxlength 5
+- contactNumber text-line "Phone Number" size 10 maxlength 10
+- telecomExtension text-line "Extension" size 4 maxlength 8
+- emailContactMechId drop-down "Select Email" entity mantle.party.contact.PartyContactMechInfo key contactMechId text ${infoString} and partyId=<partyId> contactMechTypeEnumId=CmtEmailAddress date-filter
+- emailContactMechPurposeId drop-down "Email Purpose" default EmailPrimary entity mantle.party.contact.ContactMechPurpose key contactMechPurposeId text ${description} and contactMechTypeEnumId=CmtEmailAddress order description
+- emailAddress text-line "Email" size 40
+- webContactMechPurposeId drop-down "Web URL Purpose" default WebUrlPrimary entity mantle.party.contact.ContactMechPurpose key contactMechPurposeId text ${description} and contactMechTypeEnumId=CmtWebAddress order description
+- webAddress text-line "Web URL" size 40
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -74,6 +101,20 @@ fields: `partyId`, `baseCurrencyUomId` (default USD), `localCurrencyUomId` (empt
 `cogsMethodEnumId=CogsActualCost`, `sourcePartyId=DefaultSettings`.
 Then POST `updatePartyAcctgPreference`: `realTimeGlSummary=Y`, `settlementTermId` (Default Receivables Term).
 Link `/qapps/marble/Accounting/OrgSettings/AcctgPreference?partyId=`.
+## Widgets
+Form `/apps/marble/Accounting/OrgSettings/AcctgPreference` `CloneAcctgSettingsForm` POST `initPartyAccountingConfiguration`.
+- baseCurrencyUomId drop-down "Base Currency" default USD find_basic moqui.basic.Uom key uomId text ${uomId} - ${description} and uomTypeEnumId=UT_CURRENCY_MEASURE order description
+- localCurrencyUomId drop-down "Local Currency" allow-empty find_basic moqui.basic.Uom key uomId text ${uomId} - ${description} and uomTypeEnumId=UT_CURRENCY_MEASURE order description
+Form `/apps/marble/Accounting/OrgSettings/AcctgPreference` `EditPapForm` POST `updatePartyAcctgPreference`.
+- settlementTermId drop-down "Default Receivables Term" allow-empty entity mantle.account.invoice.SettlementTerm key settlementTermId text ${description} order description
+- hourlyTimePeriodTypeId drop-down "Pay Period - Hourly" entity mantle.party.time.TimePeriodType key timePeriodTypeId text ${description} and periodPurposeEnumId=Payroll order description
+- salaryTimePeriodTypeId drop-down "Pay Period - Salary" entity mantle.party.time.TimePeriodType key timePeriodTypeId text ${description} and periodPurposeEnumId=Payroll order description
+- errorGlJournalId drop-down "Error Journal" entity mantle.ledger.transaction.GlJournal key glJournalId text ${glJournalName} and organizationPartyId=<organizationPartyId> order glJournalName
+- realTimeGlSummary radio "Per-Transaction GL Summary" default N options Y,N
+- taxClassificationEnumId drop-down "Tax Classification" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=TaxClassification order sequenceNum,description
+- taxFormEnumId drop-down "Tax Form" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=TaxForm order sequenceNum,description
+- employerClassEnumId drop-down "Employer Classification" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=EmployerClassification order sequenceNum,description
+- payrollTaxFormEnumId drop-down "Payroll Tax Form" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=PayrollTaxForm order sequenceNum,description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -96,6 +137,10 @@ fields: `organizationName`, optional `parentAccountPartyId`.
 Returns `partyId`. Roles: `Customer` and `Account` (Sales Account).
 Link `/qapps/marble/Customer/EditCustomer` `{partyId}`.
 Next: `add-party-contact-info`, optional `add-customer-payment-method`, `add-sales-contact`.
+## Widgets
+Form `/apps/marble/Customer/FindCustomer` `CreateAccountForm` POST `createAccount`.
+- organizationName text-line size 60
+- parentAccountPartyId drop-down "Parent Sales Account" allow-empty Lookup GET `/apps/marble/Customer/FindCustomer/searchPartyList` roleTypeId=Account server-search min-length 2
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -114,6 +159,34 @@ Before this write: if the prompt lists a QuickSearch or QuickLookup actions path
 → dialog `UpdatePaymentMethodInfo` POST `storePaymentMethodInfo` (`partyId`, type, card/bank fields).
 Do not POST cardNumber. Prefer a bank account. The dialog transition is `UpdatePaymentMethodInfo/storePaymentMethodInfo`, not a transition on EditCustomer itself.
 Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+## Widgets
+Form `/apps/marble/Customer/EditCustomer/UpdatePaymentMethodInfo` `PaymentMethodInfoForm` POST `storePaymentMethodInfo`.
+- description text-line size 60
+- firstNameOnAccount text-line size 25
+- lastNameOnAccount text-line size 25
+- companyNameOnAccount text-line size 60
+- bankName text-line size 60
+- routingNumber text-line "Routing #" size 20
+- accountNumber text-line "Account #" size 20
+- creditCardTypeEnumId drop-down find_basic moqui.basic.Enumeration key enumId text ${description} and enumTypeId=CreditCardType order description
+- cardNumber text-line "Card Number" size 16
+- validateSecurityCode text-line "Security Code" size 4
+- expireMonth drop-down options 01,02,03,04,05,06,07,08,09,10,11,12
+- expireYear drop-down list org.moqui.util.StringUtilities.getYearList(10)
+- paymentGatewayConfigId drop-down "Payment Gateway" allow-empty entity mantle.account.method.PaymentGatewayConfig key paymentGatewayConfigId text ${description} not-equals paymentGatewayTypeEnumId=PgtTest order description
+- postalContactMechId drop-down "Select Address" entity mantle.party.contact.PartyContactMechPostalAddress key contactMechId text PostalAddressSimpleTemplate and partyId=<partyId> date-filter
+- address1 text-line size 40
+- unitNumber text-line size 8
+- address2 text-line "Address 2" size 50
+- city text-line "City" size 16
+- countryGeoId drop-down default USA find_basic moqui.basic.Geo key geoId text ${geoName} and geoTypeEnumId=GEOT_COUNTRY order geoName
+- stateProvinceGeoId drop-down Lookup GET `/apps/marble/Customer/EditCustomer/UpdatePaymentMethodInfo/getGeoCountryStates` valueField geoId depends countryGeoId
+- postalCode text-line "Zip/Postal Code" size 8
+- postalCodeExt text-line "Zip/Postal Code Extension" size 4
+- telecomContactMechId drop-down "Select Phone" entity mantle.party.contact.PartyContactMechTelecomNumber key contactMechId text TelecomNumberSimpleTemplate and partyId=<partyId> date-filter
+- countryCode text-line "Country Code" default pref TelecomNumber.DefaultCountryCode or 1 size 3 maxlength 3
+- areaCode text-line "Area Code" size 3 maxlength 3
+- contactNumber text-line "Phone Number" size 8 maxlength 8
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -133,6 +206,15 @@ Before this write: if the prompt lists a QuickSearch or QuickLookup actions path
 FindCustomer **New Sales Contact** POST `/apps/marble/Customer/FindCustomer/createContact` with the same fields. `accountPartyId` is chosen on that form. FindCustomer has no `addContact`.
 `ClientBilling` prints the contact on receivable invoices.
 Link `/qapps/marble/Customer/EditCustomer?partyId=`.
+## Widgets
+Form `/apps/marble/Customer/EditCustomer` `AddContactAssignForm` POST `addContact`.
+- partyId drop-down "Contact" Lookup GET `/apps/marble/Customer/EditCustomer/searchPartyList` server-search min-length 2
+- fromRoleTypeId drop-down "Role" allow-empty entity mantle.party.RoleGroupMemberAndType key roleTypeId text ${description} and roleGroupEnumId=RgpAccountContact order description
+Form `/apps/marble/Customer/FindCustomer` `CreateContactForm` POST `createContact`.
+- accountPartyId drop-down "Sales Account" allow-empty Lookup GET `/apps/marble/Customer/FindCustomer/searchPartyList` roleTypeId=Account server-search min-length 2
+- firstName text-line size 30
+- lastName text-line size 30
+- fromRoleTypeId drop-down "Role" allow-empty entity mantle.party.RoleGroupMemberAndType key roleTypeId text ${description} and roleGroupEnumId=RgpAccountContact order description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -157,6 +239,24 @@ Do not send `cardNumber` or `newPassword`. The dialog has neither field.
 Returns `partyId`. Link `/qapps/marble/Customer/EditCustomer?partyId=`.
 A company or business customer is `create-sales-account`. A billing contact is `add-sales-contact`.
 Next: `add-party-contact-info` for more contact methods, optional `add-customer-payment-method`.
+## Widgets
+Form `/apps/marble/Customer/FindCustomer` `CreatePersonForm` POST `createPersonCustomer`.
+- partyClassificationId drop-down "Customer Class" allow-empty default CustConsumer entity mantle.party.PartyClassification key partyClassificationId text ${description} and classificationTypeEnumId=PcltCustomer order description
+- accountPartyId drop-down "Sales Account" allow-empty entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=Account disabled=N or-null disabled order organizationName,firstName,lastName
+- firstName text-line "First Name" size 30
+- lastName text-line "Last Name" size 30
+- emailAddress text-line "Email" size 40
+- countryCode text-line "Country Code" default pref TelecomNumber.DefaultCountryCode or 1 size 3 maxlength 3
+- areaCode text-line "Area Code" size 3 maxlength 3
+- contactNumber text-line "Phone Number" size 8 maxlength 8
+- address1 text-line "Address 1" size 30
+- unitNumber text-line "Unit" size 10
+- address2 text-line "Address 2" size 30
+- city text-line "City" size 16
+- countryGeoId drop-down default USA find_basic moqui.basic.Geo key geoId text ${geoName} and geoTypeEnumId=GEOT_COUNTRY order geoName
+- stateProvinceGeoId drop-down Lookup GET `/apps/marble/Customer/FindCustomer/getGeoCountryStates` valueField geoId depends countryGeoId
+- postalCode text-line "Zip/Postal Code" size 8
+- postalCodeExt text-line "Zip/Postal Code Extension" size 4
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -179,6 +279,18 @@ optional `userGroupId` (groupType `UgtMarbleErp`).
 Adds role `Employee` and relationship to employer. Password: Reset Password / Account Detail (System) — not Assist.
 Or add `Employee` role to the Initial Admin person on FindParty.
 Link `/qapps/marble/Party/EditParty?partyId=`.
+## Widgets
+Form `/apps/marble/Party/FindParty` `CreateEmployeeForm` POST `createPersonEmployee`.
+- pseudoId text-line "ID" size 15
+- firstName text-line size 20
+- middleName text-line size 10
+- lastName text-line size 20
+- emailAddress text-line "Email" size 40
+- countryCode text-line "Country Code" default pref TelecomNumber.DefaultCountryCode or 1 size 3 maxlength 3
+- areaCode text-line "Area Code" size 3 maxlength 3
+- contactNumber text-line "Phone Number" size 8 maxlength 8
+- employerPartyId drop-down "Employer/Branch" allow-empty entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal,OrgEmployer disabled=N or-null disabled order organizationName,firstName,lastName
+- userGroupId drop-down "User Group" allow-empty entity moqui.security.UserGroup key userGroupId text ${description} and groupTypeEnumId=UgtMarbleErp order description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -198,6 +310,13 @@ fields: short `workEffortId` (task ID prefix), `workEffortName`,
 `clientPartyId` (Sales Account), `vendorPartyId` (Internal Org), optional `purposeEnumId` (parent `WetProject`).
 Type `WetProject`. Link `/qapps/marble/Project/EditProject?workEffortId=`.
 Next: `create-work-task`.
+## Widgets
+Form `/apps/marble/Project/FindProject` `NewProject` POST `createProject`.
+- workEffortId text-line "ID" size 8 maxlength 8
+- workEffortName text-line "Project Name"
+- clientPartyId drop-down "Client" allow-empty Lookup GET `/apps/marble/Project/FindProject/searchPartyList` roleTypeId=Customer,CustomerBillTo,OrgInternal server-search min-length 0
+- vendorPartyId drop-down "Vendor" allow-empty Lookup GET `/apps/marble/Project/FindProject/searchPartyList` roleTypeId=Vendor,VendorBillFrom,OrgInternal server-search min-length 0
+- purposeEnumId drop-down "Purpose" allow-empty find_basic moqui.basic.Enumeration key enumId text ${description} and enumTypeId=WorkEffortPurpose parentEnumId=WetProject order description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -216,6 +335,19 @@ Dashboard Tasks → `/apps/marble/Task/FindTask`.
 fields: `rootWorkEffortId` (Project), `assignToPartyId`, `workEffortName`, `priority` (1 high–9 low, default 5),
 `purposeEnumId` (default `WepTask`), `statusId` (`WeInPlanning`/`WeApproved`/`WeInProgress`), optional due/hours/`description`.
 Type `WetTask`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
+## Widgets
+Form `/apps/marble/Task/FindTask` `NewTaskForm` POST `createTask`.
+- rootWorkEffortId drop-down "Project" allow-empty list myProjectList is not an and-map (or-group on mantle.work.effort.WorkEffortAndParty). GET `/apps/marble/Project/FindProject/actions/ListProjects`
+- milestoneWorkEffortId drop-down "Milestone" allow-empty Lookup GET `/apps/marble/Task/FindTask/getProjectMilestones` valueField workEffortId labelField milestoneLabel depends rootWorkEffortId
+- parentWorkEffortId drop-down "Parent Task" allow-empty Lookup GET `/apps/marble/Task/FindTask/getTaskList` depends rootWorkEffortId server-search min-length 2
+- assignToPartyId drop-down "Assign To" allow-empty Lookup GET `/apps/marble/Task/FindTask/getProjectParties` addOptional=false valueField partyId labelField name depends rootWorkEffortId server-search min-length 0
+- workEffortName text-line "Task Name"
+- priority drop-down default 5 options 1,2,3,4,5,6,7,8,9
+- purposeEnumId drop-down "Purpose" default WepTask find_basic moqui.basic.Enumeration key enumId text ${description} and enumTypeId=WorkEffortPurpose parentEnumId=WetTask order description
+- statusId drop-down "Status" find_basic moqui.basic.StatusItem key statusId text StatusItemNameTemplate and statusTypeId=WorkEffort order sequenceNum
+- estimatedCompletionDate date-time "Due Date" type date format yyyy-MM-dd
+- estimatedWorkTime text-line "Estimated Hours" size 5
+- description text-area "Description" cols 60 rows 10
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -234,6 +366,16 @@ Dashboard HR → Labor Rates `/apps/marble/HumanRes/EditRateAmounts`.
 fields: `rateTypeEnumId=RatpStandard`, `ratePurposeEnumId=RaprClient` (Client Billing),
 `timePeriodUomId=TF_hr`, optional `workEffortId`/`partyId`, `rateAmount`, `rateCurrencyUomId`.
 Link `/qapps/marble/HumanRes/EditRateAmounts`.
+## Widgets
+Form `/apps/marble/HumanRes/EditRateAmounts` `CreateRateAmount` POST `createRateAmount`.
+- workEffortId drop-down "Project" allow-empty entity mantle.work.effort.WorkEffort key workEffortId text ${workEffortId} - ${workEffortName} and workEffortTypeEnumId=WetProject order workEffortId
+- partyId drop-down "Person" Lookup GET `/apps/marble/HumanRes/EditRateAmounts/getPersonList` server-search min-length 2
+- emplPositionClassId drop-down "Position Class" allow-empty entity mantle.humanres.position.EmplPositionClass key emplPositionClassId text ${title} order title
+- workTypeEnumId drop-down "Work Type" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=WorkType order sequenceNum,description
+- fromDate date-time
+- thruDate date-time
+- rateAmount text-line size 8
+- rateCurrencyUomId drop-down "Currency" list currencyUomIdList
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -253,6 +395,26 @@ fields: `clientPartyId` (Employer=Internal Org), `workEffortId` (Task), `fromDat
 Clock In POST `clockInTimeEntry`. Also Task/Party Time under marble.
 After add, edit dialog: Client Hour Calc should match `add-labor-rate`.
 Link `/qapps/my/User/TimeEntries`.
+## Widgets
+Form `/apps/my/User/TimeEntries` `TimeEntryList` POST `recordTimeEntry`.
+- comments text-area cols 50 rows 2
+Form `/apps/my/User/TimeEntries/EditTimeEntry` `AddTimeForm` POST `recordTimeEntry`.
+- clientPartyId drop-down "Employer" allow-empty list employerPartyList
+- workEffortId drop-down "Task" allow-empty Lookup GET `/apps/my/User/TimeEntries/EditTimeEntry/getTaskList` server-search min-length 0
+- facilityId drop-down "Facility" allow-empty Lookup GET `/apps/my/User/TimeEntries/EditTimeEntry/getFacilityList` server-search min-length 0
+- workTypeEnumId drop-down "Work Type" list workTypeEnumerationList
+- emplPositionClassId drop-down "Position Class" allow-empty list emplPositionClassList
+- rateTypeEnumId drop-down "Rate Type" find_basic moqui.basic.EnumAndGroup key enumId text EnumerationNameTemplate and enumGroupEnumId=EngRateCommonEntry order sequenceNum,description
+- breakHours text-line "Unpaid break time" default 0 size 5
+- pieceCount text-line size 6
+- fromDate date-time
+- thruDate date-time "Thru"
+- hours text-line "Work and paid break time" size 5
+- comments text-area cols 100 rows 3
+- clientHourRate text-line size 8
+- vendorHourRate text-line "Worker Hour Rate" size 8
+- clientPieceRate text-line size 8
+- vendorPieceRate text-line "Worker Piece Rate" size 8
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -272,6 +434,12 @@ fields: `workEffortId`, optional `thruDate`, `entryGrouping=entry` (Item Per Tim
 Review `/apps/marble/Accounting/Invoice/FindInvoice` `invoiceType=Receivable`.
 Finalize: EditInvoice status flow POST `updateStatus` `statusId=InvoiceFinalized` (GL posts). From `InvoiceInProcess`.
 Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+## Widgets
+Form `/apps/marble/Project/ProjectTimeEntries` `ProjectInvoice` POST `createProjectInvoiceItems`.
+- workEffortId drop-down "Project" Lookup GET `/apps/marble/Project/ProjectTimeEntries/getProjectList` server-search min-length 0
+- thruDate date-time type date-time
+- invoiceId drop-down "Existing Invoice" allow-empty Lookup GET `/apps/marble/Project/ProjectTimeEntries/getOpenClientInvoicesByProject` valueField invoiceId depends workEffortId server-search min-length 0
+- entryGrouping drop-down "Grouping" default worker options entry,worker,all
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -292,6 +460,34 @@ Dashboard Products → `/apps/marble/Catalog/Product/FindProduct`.
 EditProduct POST `updateProduct`: `assetTypeEnumId=AstTpInventory`, `assetClassEnumId=AsClsInventoryFin`.
 Prices tab POST `createProductPrice`: `priceTypeEnumId=PptCurrent`, `pricePurposeEnumId=PppPurchase`, `price`, `priceUomId`, optional vendor/customer/`minQuantity`.
 Link `/qapps/marble/Catalog/Product/EditProduct?productId=`.
+## Widgets
+Form `/apps/marble/Catalog/Product/FindProduct` `NewProductForm` POST `createProduct`.
+- productName text-line
+Form `/apps/marble/Catalog/Product/EditProduct` `EditProductForm` POST `updateProduct`.
+- pseudoId text-line "ID" size 40
+- productName text-line "Name" size 80
+- description text-area cols 80 rows 8
+- comments text-area "Internal Comments" cols 80 rows 4
+- productTypeEnumId drop-down "Type" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=ProductType order sequenceNum,description
+- productClassEnumId drop-down "Class" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=ProductClass order sequenceNum,description
+- ownerPartyId drop-down "Owned By Org" allow-empty entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal disabled=N or-null disabled order organizationName
+- amountFixed text-line "Amount Included" size 10
+- amountUomId drop-down "UOM" allow-empty find_basic moqui.basic.Uom key uomId text ${description} [${abbreviation}] and uomId=OTH_ct,OTH_ea order description
+- salesIntroductionDate date-time "Sales Intro"
+- salesDiscontinuationDate date-time "Sales Discontinue"
+- signatureRequiredEnumId drop-down "Sign Req." find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=SignatureRequired order sequenceNum,description
+- shippingInsuranceReqd radio "Ship Insure Reqd" default N options Y,N
+- originGeoId drop-down "Country of Origin" allow-empty find_basic moqui.basic.Geo key geoId text ${geoCodeAlpha3} - ${geoName} and geoTypeEnumId=GEOT_COUNTRY order geoCodeAlpha2
+Form `/apps/marble/Catalog/Product/EditPrices` `NewPriceForm` POST `createProductPrice`.
+- vendorPartyId drop-down "Vendor" allow-empty Lookup GET `/apps/marble/Catalog/Product/EditPrices/searchPartyList` roleTypeId=Vendor,Supplier server-search min-length 2
+- customerPartyId drop-down "Customer" allow-empty Lookup GET `/apps/marble/Catalog/Product/EditPrices/searchPartyList` roleTypeId=Customer server-search min-length 2
+- otherPartyItemId text-line "Other Party Product ID" size 25
+- fromDate date-time
+- thruDate date-time
+- productStoreId drop-down "Store" allow-empty entity mantle.product.store.ProductStore key productStoreId text ${storeName} [${productStoreId}] order storeName
+- minQuantity text-line default 1 size 10
+- price text-line size 10
+- priceUomId drop-down "Currency" find_basic moqui.basic.Uom key uomId text ${description} [${uomId}] and uomTypeEnumId=UT_CURRENCY_MEASURE order description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -310,6 +506,11 @@ Dashboard Facilities → `/apps/marble/Facility/FindFacility`.
 fields: optional `pseudoId`, `facilityName`, `facilityTypeEnumId=FcTpWarehouse`, optional `ownerPartyId` (Internal Org).
 Link `/qapps/marble/Facility/EditFacility?facilityId=`.
 Next: `create-product-store`.
+## Widgets
+Form `/apps/marble/Facility/FindFacility` `NewFacilityForm` POST `createFacility`.
+- pseudoId text-line "ID" size 15
+- facilityName text-line
+- ownerPartyId drop-down "Owner" Lookup GET `/apps/marble/Facility/FindFacility/searchPartyList` server-search min-length 2
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -328,6 +529,33 @@ Dashboard Stores → `/apps/marble/ProductStore/FindProductStore`.
 EditStore POST `updateStore`: `inventoryFacilityId`, `reservationAutoEnumId=AsResAutoPlaced` (On Order Placed),
 `defaultCurrencyUomId` (e.g. USD).
 Link `/qapps/marble/ProductStore/EditProductStore?productStoreId=`.
+## Widgets
+Form `/apps/marble/ProductStore/FindProductStore` `NewStoreForm` POST `createStore`.
+- productStoreId text-line "ID" size 20
+- storeName text-line "Name" size 40
+- organizationPartyId drop-down "Organization Party" entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal disabled=N or-null disabled order organizationName
+Form `/apps/marble/ProductStore/EditProductStore` `EditStoreForm` POST `updateStore`.
+- storeName text-line "Name" size 50
+- organizationPartyId drop-down "Organization" allow-empty entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal disabled=N or-null disabled order organizationName
+- inventoryFacilityId drop-down "Facility" allow-empty Lookup GET `/apps/marble/ProductStore/EditProductStore/getFacilityList` server-search min-length 0
+- requireInventory radio "Require Inventory" default N options Y,N
+- defaultDisablePromotions radio default N options Y,N
+- defaultDisableShippingCalc radio default N options Y,N
+- defaultDisableTaxCalc radio default N options Y,N
+- markupOrderShipLabels radio "Markup Order Shipping Price" default N options Y,N
+- markupShipmentShipLabels radio default N options Y,N
+- shipmentAnyCarrierMethod radio "Any Carrier Method?" default N options Y,N
+- insurancePackageThreshold text-line "Insurance Threshold" size 10
+- autoApproveDelay text-line "Delay in minutes, set to 0 to try auto-approve immediately when placed" size 5
+- storeDomain text-line "Store Domain" size 30
+- profileUrlPath text-line "Profile Url Path" size 30
+- wikiSpaceId drop-down "Wiki Space ID" allow-empty entity moqui.resource.wiki.WikiSpace key wikiSpaceId text ${wikiSpaceId}: ${description ?: ''} order wikiSpaceId
+- defaultLocale drop-down "Default Locale" allow-empty list localeStringList
+- defaultCurrencyUomId drop-down "Default Currency" allow-empty find_basic moqui.basic.Uom key uomId text UomNameTemplate and uomTypeEnumId=UT_CURRENCY_MEASURE order description
+- defaultSalesChannelEnumId drop-down "Default Order Source" allow-empty find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=SalesChannel order enumId
+- requireCustomerRole drop-down "Require Customer Role" allow-empty options Y,N
+- taxGatewayConfigId drop-down "Tax Gateway" allow-empty entity mantle.other.tax.TaxGatewayConfig key taxGatewayConfigId text ${description ?: ''} [${taxGatewayConfigId}] order taxGatewayConfigId
+- systemMessageRemoteId drop-down "Remote" allow-empty entity moqui.service.message.SystemMessageRemote key systemMessageRemoteId text ${description} order description
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -347,6 +575,23 @@ Dashboard Inventory → `/apps/marble/Asset/Asset/FindSummary` `assetTypeEnumId=
 **Receive Direct** POST `receiveAsset`
 fields: `productId`, `statusId=AstAvailable`, `quantity`, `facilityId`, `ownerPartyId` (activeOrgId), `acquireCost` (required without PO).
 Link `/qapps/marble/Asset/Asset/FindSummary`.
+## Widgets
+Form `/apps/marble/Asset/Asset/FindSummary` `ReceiveAssetForm` POST `receiveAsset`.
+- productId drop-down "Product*" Lookup GET `/apps/marble/Asset/Asset/FindSummary/getProductList` server-search min-length 2
+- receivedDate date-time "Received Date"
+- mfgPartyId drop-down "Manufacturer" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/searchPartyList` roleTypeId=Supplier,Manufacturer server-search min-length 0
+- lotId drop-down "Lot" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/getLotList` depends mfgPartyId server-search min-length 0
+- lotNumber text-line "For new lot enter Lot Number (and Dates), for existing select above" size 20
+- manufacturedDate date-time "Manufactured" type date
+- expectedEndOfLife date-time "Expiration" type date
+- ownerPartyId drop-down "Owner" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/searchPartyList` roleTypeId=Supplier,OrgInternal server-search min-length 0
+- assetPoolId drop-down "Pool" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/getAssetPoolList` depends ownerPartyId server-search min-length 0
+- acquireCost text-line size 8
+- quantity text-line "Quantity*" size 8
+- facilityId drop-down "Facility*" Lookup GET `/apps/marble/Asset/Asset/FindSummary/getFacilityList` server-search min-length 0
+- locationSeqId drop-down "Location" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/getLocationList` depends facilityId server-search min-length 0
+- containerId drop-down "Container" allow-empty Lookup GET `/apps/marble/Asset/Asset/FindSummary/getContainerList` depends facilityId,locationSeqId server-search min-length 0
+- comments text-area "Notes" cols 80 rows 3
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -366,6 +611,24 @@ Starts `OrderOpen`. OrderDetail **Add Product Item** POST `addProductItem` (`pro
 **Place** / **Place Warnings** POST `placeOrder` → `OrderPlaced`.
 **Approve** / **Approve Warnings** POST `approveOrder` → `OrderApproved` (needs ORDER_APPROVE).
 Link `/qapps/marble/Order/OrderDetail?orderId=`. Next: `ship-sales-order`.
+## Widgets
+Form `/apps/marble/Order/FindOrder` `CreateSalesOrder` POST `createOrder`.
+- productStoreId drop-down "Store" allow-empty entity mantle.product.store.ProductStore key productStoreId text ${productStoreId}: ${storeName} order storeName
+- vendorPartyId drop-down "Vendor Org" Lookup GET `/apps/marble/Order/FindOrder/getStoreOrgOrAllOrgInternal` depends productStoreId
+- facilityId drop-down "Facility" Lookup GET `/apps/marble/Order/FindOrder/getWhFacilitiesByOwner` valueField facilityId depends vendorPartyId,productStoreId
+- customerPartyId drop-down "Customer" allow-empty Lookup GET `/apps/marble/Order/FindOrder/searchPartyList` roleTypeId=Customer server-search min-length 2
+- otherPartyOrderId text-line "Their Order ID" size 40
+- priority radio default 5 options 1,2,3,4,5,6,7,8,9
+- shipBeforeDate date-time
+- estimatedDeliveryDate date-time "Delivery Date"
+Form `/apps/marble/Order/OrderDetail` `AddProductItemForm` POST `addProductItem`.
+- assetClassEnumId drop-down "Asset Class" allow-empty default AsClsInventoryFin find_basic moqui.basic.Enumeration key enumId text ${description} and parentEnumId=AsClsInventory order sequenceNum,description
+- productId drop-down "Product" Lookup GET `/apps/marble/Order/OrderDetail/getProductList` depends assetClassEnumId server-search min-length 0
+- quantity text-line default 1 size 8
+- unitAmount text-line "Price" size 10
+- standardCost text-line "Cost for accounting if different from Price, used to set Asset Acquire Cost on receipt" size 10
+- requiredByDate date-time format yyyy-MM-dd HH:mm
+- itemTypeEnumId drop-down "Item Type" default ItemProduct options ItemProduct,ItemAsset,ItemRental,ItemReplacement
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -386,6 +649,15 @@ Items **Issue & Pack** POST `packItemSource` (defaults). Then **Set Packed** POS
 **Set Shipped** POST `shipShipment` (`actualStartDate`) → `ShipShipped`.
 Outgoing flow: Input/Scheduled → Packed (required) → Shipped.
 Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`.
+## Widgets
+Form `/apps/marble/Shipment/ShipmentDetail` `ItemSourceIssuanceList` POST `packItemSource`.
+- packDate date-time "Pack Date"
+- shipmentPackageSeqId drop-down "Package##Shipment" list shipmentPackageList
+- quantity text-line "Pack Quantity" size 6
+Form `/apps/marble/Shipment/ShipmentDetail` `SetPackedForm` POST `packShipment`.
+- packedDate date-time
+Form `/apps/marble/Shipment/ShipmentDetail` `SetShippedForm` POST `shipShipment`.
+- actualStartDate date-time "Actual Start"
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -407,6 +679,17 @@ fields: `invoiceId`, `statusId` (`PmntPromised` default; `PmntDelivered` if alre
 `amount`, `effectiveDate` (GL date), `paymentInstrumentEnumId`, optional `paymentMethodId`.
 Applied until unpaid $0; invoice → `InvoicePmtRecvd`.
 Link `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+## Widgets
+Form `/apps/marble/Accounting/Invoice/EditInvoice` `RecordPaymentForm` POST `recordPayment`.
+- statusId drop-down "Payment Status" default PmntPromised options PmntProposed,PmntPromised,PmntAuthorized,PmntDelivered
+- amount text-line size 10
+- paymentInstrumentEnumId drop-down "Payment Instrument" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=PaymentInstrument order sequenceNum,description
+- paymentMethodId drop-down "From Payment Method" allow-empty entity mantle.account.method.PaymentMethodAndType key paymentMethodId text PaymentMethodAndTypeTemplate and ownerPartyId=<invoice.toPartyId> order typeDescription,description
+- effectiveDate date-time
+- dueDate date-time
+- paymentRefNum text-line "Ref/Check Number" size 10
+- memo text-line size 30
+- comments text-area cols 60 rows 4
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -609,6 +892,9 @@ GET `actions/SupplierListForm` `organizationName` or `combinedName` (extends Par
 Returns `partyId`. Link `/qapps/marble/Supplier/EditSupplier?partyId=`.
 EditSupplier is not EditParty. Do not use `add-party-contact-info` transitions here.
 Next: `create-purchase-order`.
+## Widgets
+Form `/apps/marble/Supplier/FindSupplier` `CreateOrganizationForm` POST `createOrganization`.
+- organizationName text-line size 60
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -630,6 +916,21 @@ Starts `OrderOpen`. OrderDetail **Add Product Item** POST `addProductItem` (`ord
 **Approve** / **Approve Warnings** POST `approveOrder` → `OrderApproved` (needs ORDER_APPROVE).
 **Order Sent** POST `sendOrder` → `OrderSent` (button only when the customer is an internal org).
 Link `/qapps/marble/Order/OrderDetail?orderId=`. Next: `receive-incoming-shipment`.
+## Widgets
+Form `/apps/marble/Order/FindOrder` `CreatePurchaseOrder` POST `createOrder`.
+- vendorPartyId drop-down "Supplier" allow-empty Lookup GET `/apps/marble/Order/FindOrder/searchPartyList` server-search min-length 0
+- customerPartyId drop-down "Customer Org" entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal disabled=N or-null disabled order organizationName
+- facilityId drop-down "Facility" Lookup GET `/apps/marble/Order/FindOrder/getFacilityList` facilityTypeEnumId=FcTpWarehouse server-search min-length 0
+- shipBeforeDate date-time
+- estimatedDeliveryDate date-time "Delivery Date"
+Form `/apps/marble/Order/OrderDetail` `AddProductItemForm` POST `addProductItem`.
+- assetClassEnumId drop-down "Asset Class" allow-empty default AsClsInventoryFin find_basic moqui.basic.Enumeration key enumId text ${description} and parentEnumId=AsClsInventory order sequenceNum,description
+- productId drop-down "Product" Lookup GET `/apps/marble/Order/OrderDetail/getProductList` depends assetClassEnumId server-search min-length 0
+- quantity text-line default 1 size 8
+- unitAmount text-line "Price" size 10
+- standardCost text-line "Cost for accounting if different from Price, used to set Asset Acquire Cost on receipt" size 10
+- requiredByDate date-time format yyyy-MM-dd HH:mm
+- itemTypeEnumId drop-down "Item Type" default ItemProduct options ItemProduct,ItemAsset,ItemRental,ItemReplacement
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -652,6 +953,31 @@ ShipmentDetail `/apps/marble/Shipment/ShipmentDetail?shipmentId=`.
 Receive inventory: **Receive Entire Shipment** POST `receiveEntireShipment` `shipmentId` (shown for incoming `ShipScheduled`, `ShipPacked`, or `ShipShipped`). Receives remaining quantity and sets `ShipDelivered`. Delivered creates the payable invoice.
 One product: **Receive Product** POST `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/receive` (form ReceiveForm) `shipmentId`, `productId`, `statusId`=`AstAvailable`, `quantityAccepted`, `ownerPartyId` (activeOrgId when the order did not set an owner), `acquireCost`. Then **Set Delivered** POST `deliverShipment` `shipmentId`, `actualArrivalDate` (form SetDeliveredForm). Do not use UpdateItemAsset `updateAsset` to receive; that updates an existing asset.
 Link `/qapps/marble/Shipment/ShipmentDetail?shipmentId=`. Next: `approve-payable-invoice`.
+## Widgets
+Form `/apps/marble/Shipment/FindShipment` `NewIncomingShipment` POST `createShipment`.
+- shipmentTypeEnumId drop-down "Type" list incomingTypeOut.enumerationList
+- fromPartyId drop-down "From Party" allow-empty Lookup GET `/apps/marble/Shipment/FindShipment/searchPartyList` server-search min-length 2
+- destinationFacilityId drop-down "Destination Facility" allow-empty Lookup GET `/apps/marble/Shipment/FindShipment/getFacilityList` server-search min-length 0
+- estimatedArrivalDate date-time "Arrival Date"
+Form `/apps/marble/Shipment/ShipmentDetail/ReceiveItem` `ReceiveForm` POST `receive`.
+- productId drop-down "Product" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/getProductList` server-search min-length 0
+- statusId drop-down "Status" find_basic moqui.basic.StatusItem key statusId text StatusItemNameTemplate and statusTypeId=Asset order sequenceNum
+- receivedDate date-time "Received Date"
+- mfgPartyId drop-down "Manufacturer" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/searchPartyList` roleTypeId=Supplier,Manufacturer server-search min-length 0
+- lotId drop-down "Lot" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/getLotList` depends mfgPartyId server-search min-length 0
+- lotNumber text-line "For new lot enter Lot Number (and Dates), for existing select above" size 20
+- manufacturedDate date-time "Manufactured" type date
+- expectedEndOfLife date-time "Expiration" type date
+- ownerPartyId drop-down "Owner" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/searchPartyList` roleTypeId=Supplier,OrgInternal server-search min-length 0
+- assetPoolId drop-down "Pool" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/getAssetPoolList` depends ownerPartyId server-search min-length 0
+- acquireCost text-line "Defaults to Standard Cost or Price (Unit Amount) on related order item" size 8
+- quantityAccepted text-line size 8
+- quantityRejected text-line size 8
+- serialNumber text-line "If specified Quantity Accepted will be set to 1 (one) unless Quantity Rejected is 1" size 25
+- rejectionReasonEnumId drop-down "Rejection Reason" allow-empty list reasonOut.enumerationList
+- locationSeqId drop-down "Location" allow-empty Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/getLocationList` depends facilityId server-search min-length 0
+- containerId drop-down "Container" Lookup GET `/apps/marble/Shipment/ShipmentDetail/ReceiveItem/getContainerList` depends facilityId,locationSeqId server-search min-length 0
+- comments text-area "Notes" cols 80 rows 3
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -698,6 +1024,24 @@ Find outgoing payments GET `/apps/marble/Accounting/Payment/FindPayment/actions/
 Then EditPayment **Deliver** POST `updateStatus` `statusId`=`PmntDelivered`, then form UnpaidInvoiceList POST `applyInvoicePayment` `paymentId`, `invoiceId`, `amount` (only when Delivered).
 Before the payment, read `messages`. If a message says the period is closed, repeat that warning in the confirm sentence.
 Link `/qapps/marble/Accounting/Payment/EditPayment?paymentId=` and `/qapps/marble/Accounting/Invoice/EditInvoice?invoiceId=`.
+## Widgets
+Form `/apps/marble/Accounting/Payment/FindPayment` `NewOutPaymentForm` POST `createPayment`.
+- fromPartyId drop-down "From" entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and partyId=<activeOrgId> roleTypeId=OrgInternal disabled=N or-null disabled order organizationName
+- toPartyId drop-down "To" allow-empty Lookup GET `/apps/marble/Accounting/Payment/FindPayment/searchPartyList` server-search min-length 2
+- paymentInstrumentEnumId drop-down "Instrument" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=PaymentInstrument order sequenceNum,description
+- paymentTypeEnumId drop-down "Payment Type" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=PaymentType order sequenceNum,description
+- amount text-line size 12
+- effectiveDate date-time
+Form `/apps/marble/Accounting/Invoice/EditInvoice` `RecordPaymentForm` POST `recordPayment`.
+- statusId drop-down "Payment Status" default PmntPromised options PmntProposed,PmntPromised,PmntAuthorized,PmntDelivered
+- amount text-line size 10
+- paymentInstrumentEnumId drop-down "Payment Instrument" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=PaymentInstrument order sequenceNum,description
+- paymentMethodId drop-down "From Payment Method" allow-empty entity mantle.account.method.PaymentMethodAndType key paymentMethodId text PaymentMethodAndTypeTemplate and ownerPartyId=<invoice.toPartyId> order typeDescription,description
+- effectiveDate date-time
+- dueDate date-time
+- paymentRefNum text-line "Ref/Check Number" size 10
+- memo text-line size 30
+- comments text-area cols 60 rows 4
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -717,6 +1061,19 @@ GET `actions/ListRequests` before create. Party filter is `findPartyId`, not `pa
 EditRequest POST `updateRequest` updates name, description, `assignToPartyId`, `priority`, `responseRequiredDate`, `requestTypeEnumId`, `requestResolutionEnumId`. It has no status field.
 Status only by EditRequest status-flow POST `updateStatus` `requestId` and `statusId`: **Submit** `ReqSubmitted`, **Reviewed** `ReqReviewed`, **Start Progress** `ReqInProgress`, **Complete** `ReqCompleted`, **Cancel** `ReqCancelled`, **Re-open** back to `ReqInProgress`. Use only the button the current status shows.
 Link `/qapps/marble/Request/EditRequest?requestId=`.
+## Widgets
+Form `/apps/marble/Request/FindRequest` `NewRequestForm` POST `createRequest`.
+- customerPartyId drop-down "Customer" allow-empty Lookup GET `/apps/marble/Request/FindRequest/searchPartyList` roleTypeId=Customer server-search min-length 2
+- productStoreId drop-down "Store" allow-empty entity mantle.product.store.ProductStore key productStoreId text ${productStoreId}: ${storeName} order storeName
+- rootWorkEffortId drop-down "Project" allow-empty entity mantle.work.effort.WorkEffortAndParty is not an and-map (or-group)
+- facilityId drop-down "Facility" allow-empty entity mantle.facility.Facility key facilityId text FacilityNameTemplate and facilityTypeEnumId=FcTpWarehouse order facilityName
+- assignToPartyId drop-down "Assign To" Lookup GET `/apps/marble/Request/FindRequest/searchPartyList` server-search min-length 2
+- priority drop-down default 5 options 1,2,3,4,5,6,7,8,9
+- responseRequiredDate date-time "Due Date" type date-time
+- requestTypeEnumId drop-down "Type" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=RequestType order sequenceNum,description
+- statusId drop-down "Initial Status" find_basic moqui.basic.StatusItem key statusId text StatusItemNameTemplate and statusTypeId=Request order sequenceNum
+- requestName text-line "Request Name" size 60
+- description text-area "Description" rows 10
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -740,6 +1097,16 @@ OrderDetail **Add Product Item** POST `addProductItem` (`productId`, `quantity`;
 `OrderRequested`: **Reject Quote Request** POST `rejectOrder` → `OrderRejected`.
 Do not POST `placeOrder` unless the user wants a placed order (`create-sales-order`).
 Link `/qapps/marble/Order/OrderDetail?orderId=`.
+## Widgets
+Form `/apps/marble/Order/FindOrder` `CreateSalesOrder` POST `createOrder`.
+- productStoreId drop-down "Store" allow-empty entity mantle.product.store.ProductStore key productStoreId text ${productStoreId}: ${storeName} order storeName
+- vendorPartyId drop-down "Vendor Org" Lookup GET `/apps/marble/Order/FindOrder/getStoreOrgOrAllOrgInternal` depends productStoreId
+- facilityId drop-down "Facility" Lookup GET `/apps/marble/Order/FindOrder/getWhFacilitiesByOwner` valueField facilityId depends vendorPartyId,productStoreId
+- customerPartyId drop-down "Customer" allow-empty Lookup GET `/apps/marble/Order/FindOrder/searchPartyList` roleTypeId=Customer server-search min-length 2
+- otherPartyOrderId text-line "Their Order ID" size 40
+- priority radio default 5 options 1,2,3,4,5,6,7,8,9
+- shipBeforeDate date-time
+- estimatedDeliveryDate date-time "Delivery Date"
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -771,6 +1138,11 @@ Same screens. **Create Supplier Return** POST `createReturn` (form CreateSupplie
 Shipment is `ShpTpPurchaseReturn` (outgoing, not an incoming receive). Do not POST `receiveEntireShipment` on it. Pack and ship with `packShipment` / `shipShipment` only if those outgoing buttons are on the shipment.
 Return invoice find: `invoiceType`=Receivable `invoiceTypeEnumId`=`InvoiceReturn`. Refund find: `paymentType`=Incoming `paymentTypeEnumId`=`PtRefund`.
 Link `/qapps/marble/Return/EditReturn?returnId=`.
+## Widgets
+Form `/apps/marble/Return/FindReturn` `CreateReturn` POST `createReturn`.
+- customerPartyId drop-down "Customer" Lookup GET `/apps/marble/Return/FindReturn/searchPartyList` roleTypeId=Customer server-search min-length 2
+- vendorPartyId drop-down "Vendor Org" entity mantle.party.PartyDetailAndRole key partyId text PartyNameTemplate and roleTypeId=OrgInternal partyId=<activeOrgId> disabled=N or-null disabled order organizationName,firstName,lastName
+- facilityId drop-down "Vendor Warehouse" Lookup GET `/apps/marble/Return/FindReturn/getWhFacilitiesByVendor` valueField facilityId depends vendorPartyId
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -788,6 +1160,21 @@ Find GET `/apps/marble/Task/FindTask/actions/ListTasks`. Link `/qapps/marble/Tas
 Status: TaskSummary POST `updateTaskStatus` `workEffortId`, `statusId`. Load allowed values with `getTaskStatuses` (flow from the current status only). EditTask POST `updateTask` has the same flow-limited `statusId` dropdown. Do not post a status the control does not offer. WorkEffort statuses: `WeInPlanning` `WeApproved` `WeInProgress` `WeOnHold` `WeComplete` `WeClosed` `WeCancelled`.
 Due date is `estimatedCompletionDate` (yyyy-MM-dd). TaskSummary shows it and has no due-date transition. POST EditTask `updateTask`, or FindTask selected **Update** form UpdateTaskSelected POST `updateTask` (also `statusId`, `priority`).
 Assignee is not a field on TaskSummary or EditTask. Task/EditUsers **Add Person** POST `addAssignment` `workEffortId`, `partyId`, `roleTypeId`=`Assignee`, `statusId`=`WeptAssigned` (WorkEffortParty default on that form). FindTask **Assign** POST `addWorkEffortParty` with the same party fields.
+## Widgets
+Form `/apps/marble/Task/EditTask` `EditTask` POST `updateTask`.
+- rootWorkEffortId drop-down "Project" allow-empty Lookup GET `/apps/marble/Task/EditTask/getUserProjectList` server-search min-length 0
+- milestoneWorkEffortId drop-down "Milestone" allow-empty Lookup GET `/apps/marble/Task/EditTask/getProjectMilestones` valueField workEffortId labelField milestoneLabel depends rootWorkEffortId
+- parentWorkEffortId drop-down "Parent Task" allow-empty Lookup GET `/apps/marble/Task/EditTask/getTaskList` depends rootWorkEffortId server-search min-length 2
+- workEffortName text-line "Task Name" size 60
+- priority drop-down default 5 options 1,2,3,4,5,6,7,8,9
+- purposeEnumId drop-down "Purpose" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=WorkEffortPurpose parentEnumId=WetTask order sequenceNum,description
+- statusId drop-down "Status" find_basic moqui.basic.StatusFlowTransitionToDetail key toStatusId text StatusTransitionNameTemplate and statusId=<statusId> statusFlowId=<statusFlowId ?: 'Default'>
+- resolutionEnumId drop-down "Resolution" find_basic moqui.basic.Enumeration key enumId text EnumerationNameTemplate and enumTypeId=WorkEffortResolution order sequenceNum,description
+- estimatedCompletionDate date-time "Due Date" type date format yyyy-MM-dd
+- estimatedWorkTime text-line "Estimated Hours" size 5
+- remainingWorkTime text-line "Remaining Hours" size 5
+- totalTimeAllowed text-line "Hours Budget" size 5
+- description text-area "Description" cols 100 rows 20
 ]]></body>
     </moqui.llm.LlmSkill>
 
@@ -806,6 +1193,14 @@ Order: OrderDetail **Add Note** POST `createNote` `orderId`, `noteText`. Link `/
 Task has no note transition. TaskSummary **Add Comment** POST `addComment` `workEffortId`, `subject`, `body`. Link `/qapps/marble/Task/TaskSummary?workEffortId=`.
 Request also has a note: EditRequest **Add Note** POST `createNote` `requestId`, `noteText`, and **Add Comment** POST `addComment` `requestId`, `subject`, `body`.
 Shipment screens have no note or comment transition; do not invent one.
+## Widgets
+Form `/apps/marble/Party/EditParty` `NewNoteForm` POST `createPartyNote`.
+- noteText text-area "Note" cols 60 rows 6
+Form `/apps/marble/Order/OrderDetail` `NewNoteForm` POST `createNote`.
+- noteText text-area "Note" cols 60 rows 6
+Form `/apps/marble/Task/TaskSummary` `AddCommentForm` POST `addComment`.
+- subject text-line
+- body text-area "Comment" rows 10
 ]]></body>
     </moqui.llm.LlmSkill>
 
