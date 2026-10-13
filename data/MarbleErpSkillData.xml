@@ -1266,7 +1266,7 @@ Only when none of those fit and the user already named another role: `/apps/marb
 
     <!-- ========== Concept reference ========== -->
 
-    <moqui.llm.LlmSkill skillId="MskRefParty" name="marble-party-roles"
+    <moqui.llm.LlmSkill skillId="MskRefParty" kind="reference" name="marble-party-roles"
             title="Marble party roles and concepts"
             description="Party Person Organization roles OrgInternal Customer Account Supplier Employee invoice From To"
             riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
@@ -1288,7 +1288,7 @@ Find: `/apps/marble/Party/FindParty` with `roleTypeId`.
 ]]></body>
     </moqui.llm.LlmSkill>
 
-    <moqui.llm.LlmSkill skillId="MskRefOrderShip" name="marble-order-shipment-status"
+    <moqui.llm.LlmSkill skillId="MskRefOrderShip" kind="reference" name="marble-order-shipment-status"
             title="Order and shipment statuses"
             description="OrderOpen OrderPlaced OrderApproved shipment ShipPacked ShipShipped outgoing invoice"
             riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
@@ -1307,7 +1307,7 @@ Outgoing: Packed required; Packed creates receivable invoice. Incoming: Delivere
 ]]></body>
     </moqui.llm.LlmSkill>
 
-    <moqui.llm.LlmSkill skillId="MskRefInvPmt" name="marble-invoice-payment-status"
+    <moqui.llm.LlmSkill skillId="MskRefInvPmt" kind="reference" name="marble-invoice-payment-status"
             title="Invoice and payment statuses"
             description="InvoiceInProcess InvoiceFinalized InvoicePmtRecvd PmntPromised PmntDelivered payable receivable"
             riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
@@ -1327,7 +1327,7 @@ Incoming To=Internal Org. Apply Payment or credit memo (reversed From/To) to set
 ]]></body>
     </moqui.llm.LlmSkill>
 
-    <moqui.llm.LlmSkill skillId="MskRefProdAsset" name="marble-product-asset-types"
+    <moqui.llm.LlmSkill skillId="MskRefProdAsset" kind="reference" name="marble-product-asset-types"
             title="Product asset and work types"
             description="PtAsset PtService AstTpInventory AsClsInventoryFin AstAvailable WetProject WetTask WeInProgress"
             riskId="LskReversible" statusId="LsksActive" provenanceId="LskpHuman" speaker="human"
